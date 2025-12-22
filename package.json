@@ -6,21 +6,34 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "16.0.10",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "@auth/prisma-adapter": "^2.10.0",
+    "@clerk/localizations": "^3.32.0",
+    "@clerk/nextjs": "^6.36.4",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/material": "^7.3.1",
+    "@prisma/client": "^6.15.0",
+    "bcrypt": "^6.0.0",
+    "framer-motion": "^12.23.26",
+    "next": "^15.5.0",
+    "next-auth": "^4.24.11",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.0.10",
-    "tailwindcss": "^4",
+    "eslint": "9.33.0",
+    "eslint-config-next": "15.5.0",
+    "prisma": "^6.15.0",
     "typescript": "^5"
   }
 }

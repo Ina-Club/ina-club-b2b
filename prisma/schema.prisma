@@ -1,0 +1,300 @@
+// ----------------------------------------------------
+// Generators & datasource
+// ----------------------------------------------------
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ----------------------------------------------------
+// Enums
+// ----------------------------------------------------
+enum GroupStatus {
+  OPEN
+  CLOSED
+  CANCELED
+  EXPIRED
+  PENDING
+  PREVIEW
+}
+
+enum Role {
+  USER
+  BUSINESS
+  ADMIN
+}
+
+enum PackageType {
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ----------------------------------------------------
+// Core: User, Company, Category
+// ----------------------------------------------------
+model User {
+  id               String                     @id @default(uuid())
+  name             String?
+  email            String                     @unique
+  password         String?
+  emailVerified    DateTime?
+  createdAt        DateTime                   @default(now())
+  role             Role                       @default(USER)
+  phone            String?
+
+  // B2B Package
+  b2bPackage       B2BPackage?
+
+  // Participation
+  requestGroupMemberships RequestGroupParticipant[]
+  activeGroupMemberships  ActiveGroupParticipant[]
+
+  // Ownership
+  requestGroups    RequestGroup[]             @relation("RequestGroupOwners")
+  activeGroups     ActiveGroup[]              @relation("ActiveGroupOwners")
+
+  // Image (1-to-1)
+  profilePicture   Image?                     @relation("UserProfilePicture", fields: [profilePictureId], references: [id], onDelete: SetNull)
+  profilePictureId String?                    @unique
+
+  // NextAuth relations
+  accounts         Account[]
+  sessions         Session[]
+}
+
+model B2BPackage {
+  id              String        @id @default(uuid())
+  userId          String        @unique
+  packageType     PackageType
+  maxGroups       Int           // Maximum number of active groups
+  price           Float         // Monthly price
+  startDate       DateTime      @default(now())
+  endDate         DateTime?
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  b2bPackageId    String
+  amount          Float
+  status          PaymentStatus @default(PENDING)
+  paymentDate     DateTime      @default(now())
+  transactionId   String?
+  createdAt       DateTime      @default(now())
+
+  b2bPackage      B2BPackage    @relation(fields: [b2bPackageId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id            String        @id @default(uuid())
+  title         String
+  websiteUrl    String?       @unique
+  description   String?
+  phone         String?
+  email         String?
+  address       String?
+  city          String?
+  verified      Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  categories    Category[]    @relation("CompanyCategories")
+  activeGroups  ActiveGroup[]
+
+  // Image (1-to-1)
+  logo          Image?        @relation("CompanyLogo", fields: [logoId], references: [id], onDelete: SetNull)
+  logoId        String?       @unique
+}
+
+model Category {
+  id             String         @id @default(uuid())
+  name           String         @unique
+
+  companies      Company[]      @relation("CompanyCategories")
+  activeGroups   ActiveGroup[]  @relation("ActiveGroupCategory")
+  requestGroups  RequestGroup[] @relation("RequestGroupCategory")
+}
+
+// ----------------------------------------------------
+// Images (ordered & reusable)
+// ----------------------------------------------------
+model Image {
+  id       String   @id @default(uuid())
+  url      String
+
+  // Relations
+  profilePictureUser User?         @relation("UserProfilePicture")
+  companyLogo        Company?      @relation("CompanyLogo")
+  requestGroupImages RequestGroupImage[]
+  activeGroupImages  ActiveGroupImage[]
+}
+
+// ----------------------------------------------------
+// Pivot tables for attaching images
+// ----------------------------------------------------
+model RequestGroupImage {
+  id             String       @id @default(uuid())
+  requestGroupId String
+  imageId        String
+  order          Int?
+
+  requestGroup   RequestGroup @relation(fields: [requestGroupId], references: [id], onDelete: Cascade)
+  image          Image        @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([requestGroupId, imageId])
+}
+
+model ActiveGroupImage {
+  id            String      @id @default(uuid())
+  activeGroupId String
+  imageId       String
+  order         Int?
+
+  activeGroup   ActiveGroup @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+  image         Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([activeGroupId, imageId])
+}
+
+// ----------------------------------------------------
+// RequestGroup (pre-deal crowd intent)
+// ----------------------------------------------------
+model RequestGroup {
+  id               String        @id @default(uuid())
+  title            String
+  description      String
+  status           GroupStatus   @default(OPEN)
+  categoryId       String
+  category         Category      @relation("RequestGroupCategory", fields: [categoryId], references: [id], onDelete: Restrict)
+  createdAt        DateTime      @default(now())
+  createdById      String
+  createdBy        User          @relation("RequestGroupOwners", fields: [createdById], references: [id], onDelete: Restrict)
+
+  // Relations
+  participants     RequestGroupParticipant[]
+  images           RequestGroupImage[]
+  activeGroups     ActiveGroup[]             @relation("RequestGroupToActiveGroup")
+}
+
+model RequestGroupParticipant {
+  id               String       @id @default(uuid())
+  userId           String
+  requestGroupId   String
+  joinedAt         DateTime     @default(now())
+
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestGroup     RequestGroup @relation(fields: [requestGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, requestGroupId])
+}
+
+// ----------------------------------------------------
+// ActiveGroup (live deal)
+// ----------------------------------------------------
+model ActiveGroup {
+  id                    String        @id @default(uuid())
+  title                 String
+  description           String
+  status                GroupStatus   @default(OPEN)
+  categoryId            String
+  category              Category      @relation("ActiveGroupCategory", fields: [categoryId], references: [id], onDelete: Restrict)
+  basePrice             Float
+  groupPrice            Float
+  minParticipants       Int?
+  maxParticipants       Int?
+  deadline              DateTime
+  createdAt             DateTime      @default(now())
+  requestGroupId        String?
+  requestGroup          RequestGroup? @relation("RequestGroupToActiveGroup", fields: [requestGroupId], references: [id], onDelete: SetNull)
+  companyId             String
+  company               Company       @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  createdById           String
+  createdBy             User          @relation("ActiveGroupOwners", fields: [createdById], references: [id], onDelete: Restrict)
+
+  // Relations
+  participants          ActiveGroupParticipant[]
+  images                ActiveGroupImage[]
+}
+
+model ActiveGroupParticipant {
+  id              String          @id @default(uuid())
+  userId          String
+  activeGroupId   String
+  joinedAt        DateTime        @default(now())
+  lastPing        DateTime       
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeGroup     ActiveGroup     @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activeGroupId])
+}
+
+// ----------------------------------------------------
+// NextAuth Adapter Models
+// ----------------------------------------------------
+
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ----------------------------------------------------
+// Pending profile info captured before email verification
+// ----------------------------------------------------
+
+model PendingProfile {
+  email          String   @id
+  name           String
+  hashedPassword String
+  imageUrl       String?
+  createdAt      DateTime @default(now())
+}
+
