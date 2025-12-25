@@ -85,7 +85,6 @@ export default function ParticipantsPage() {
   if (loading) {
     return (
       <>
-        <Header />
         <Box
           sx={{
             display: "flex",
@@ -96,14 +95,12 @@ export default function ParticipantsPage() {
         >
           <CircularProgress />
         </Box>
-        <Footer />
       </>
     );
   }
 
   return (
     <>
-      <Header />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
           <Button
@@ -179,7 +176,6 @@ export default function ParticipantsPage() {
           </TableContainer>
         )}
       </Container>
-      <Footer />
     </>
   );
 }

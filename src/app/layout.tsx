@@ -23,6 +23,7 @@ export default function RootLayout({
     <ClerkProvider
       appearance={CLERK_APPEARANCE_CONFIG}
       localization={CLERK_LOCALIZATION_CONFIG}
+      signUpUrl={undefined}
     >
       <ThemeRegistry>
         <html lang="he" dir="rtl">

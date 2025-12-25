@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import {
   Box,
   Button,
@@ -16,9 +19,9 @@ import PricingSection from "@/components/pricing/pricing-section";
 // שלבים של "איך זה עובד"
 const steps = [
   {
-    title: "התחברות",
+    title: "בחירת חבילה",
     description:
-      "התחבר למערכת או הירשם אם אתה חדש. אם אין לך חבילה, תוכל לבחור אחת המתאימה לעסק שלך.",
+      "בחר את החבילה המתאימה לעסק שלך. לאחר בחירת החבילה, תוכל למלא פרטים ונחזור אליך תוך 2-4 ימי עסקים.",
     icon: <Business sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />,
   },
   {
@@ -41,40 +44,7 @@ const steps = [
   },
 ];
 
-// חברות שעובדות איתנו
-const partners = [
-  { name: "SmartBuy", category: "גאדג'טים ואלקטרוניקה" },
-  { name: "HomeDeal", category: "מוצרי בית ומטבח" },
-  { name: "EcoMarket", category: "מוצרים אקולוגיים" },
-  { name: "StyleHub", category: "אופנה ולייף סטייל" },
-  { name: "FitGear", category: "ציוד ספורט" },
-  { name: "BabyPlus", category: "מוצרי תינוקות" },
-];
-
-// המלצות מלקוחות
-const testimonials = [
-  {
-    company: "MoveWell",
-    role: "מנהלת רשת סטודיואים",
-    quote:
-      "Ina Club B2B נתן לנו שליטה מלאה ברישומים ובתזמון השיעורים. עברנו שבוע בלבד עד שהצוות הסתגל.",
-    name: "שירי כהן",
-  },
-  {
-    company: "Pulse Pro",
-    role: "מנהל תפעול",
-    quote:
-      "הדוחות בזמן אמת והטבלאות ברורים. סוף סוף רואים את התפוסה וההכנסות בלי אקסלים.",
-    name: "עידו שחר",
-  },
-  {
-    company: "Breathe Studio",
-    role: "בעלים",
-    quote:
-      "התמיכה מעולה והמערכת אינטואיטיבית. כל המדריכים שלנו עובדים עם אותה שפה ומבינים מה קורה.",
-    name: "אלה פרידמן",
-  },
-];
+// These will be loaded from the database
 
 // סרטוני הסבר
 const tutorialVideos = [
@@ -96,6 +66,50 @@ const tutorialVideos = [
 ];
 
 export default function HomePage() {
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+  const [partners, setPartners] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push("/dashboard");
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [partnersRes, testimonialsRes] = await Promise.all([
+          fetch("/api/partners"),
+          fetch("/api/testimonials"),
+        ]);
+
+        if (partnersRes.ok) {
+          const partnersData = await partnersRes.json();
+          setPartners(partnersData.partners || []);
+        }
+
+        if (testimonialsRes.ok) {
+          const testimonialsData = await testimonialsRes.json();
+          setTestimonials(testimonialsData.testimonials || []);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Show loading or nothing while checking auth
+  if (isLoaded && isSignedIn) {
+    return null;
+  }
+
   return (
     <>
       {/* Hero Section */}
@@ -199,7 +213,7 @@ export default function HomePage() {
             <Button
               variant="contained"
               component={Link}
-              href="/auth/signin"
+              href="/sign-in"
               startIcon={<Business />}
               sx={{
                 bgcolor: "#f0a868",
@@ -316,13 +330,13 @@ export default function HomePage() {
             מוכן להתחיל?
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            התחבר או הירשם כדי להתחיל לנהל את הקבוצות הפעילות שלך
+            התחבר כדי להתחיל לנהל את הקבוצות הפעילות שלך
           </Typography>
           <Button
             variant="contained"
             size="large"
             component={Link}
-            href="/auth/signin"
+            href="/sign-in"
             sx={{ px: 4, py: 1.5 }}
           >
             התחל עכשיו
@@ -353,36 +367,42 @@ export default function HomePage() {
               gap: 3,
             }}
           >
-            {partners.map((partner) => (
-              <Box key={partner.name}>
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    boxShadow: 2,
-                    height: "100%",
-                    bgcolor: "white",
-                  }}
-                >
-                  <CardContent sx={{ textAlign: "center", py: 4 }}>
-                    <Box
-                      sx={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 2,
-                        mx: "auto",
-                        mb: 2,
-                      }}
-                    />
-                    <Typography variant="h6" sx={{ color: "#1a2a5a", mb: 1 }}>
-                      {partner.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {partner.category}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Box>
-            ))}
+            {loading ? (
+              <Typography>טוען...</Typography>
+            ) : partners.length > 0 ? (
+              partners.map((partner) => (
+                <Box key={partner.id || partner.name}>
+                  <Card
+                    sx={{
+                      borderRadius: 3,
+                      boxShadow: 2,
+                      height: "100%",
+                      bgcolor: "white",
+                    }}
+                  >
+                    <CardContent sx={{ textAlign: "center", py: 4 }}>
+                      <Box
+                        sx={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 2,
+                          mx: "auto",
+                          mb: 2,
+                        }}
+                      />
+                      <Typography variant="h6" sx={{ color: "#1a2a5a", mb: 1 }}>
+                        {partner.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {partner.category}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Box>
+              ))
+            ) : (
+              <Typography>אין חברות להצגה</Typography>
+            )}
           </Box>
         </Container>
       </Box>
@@ -435,27 +455,33 @@ export default function HomePage() {
 
           {/* המלצות */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {testimonials.slice(0, 3).map((item, index) => (
-              <Card
-                key={index}
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: 3,
-                  bgcolor: "#f8fafc",
-                  height: "100%",
-                }}
-              >
-                <CardContent>
-                  <Typography sx={{ mb: 2, color: "#1a2a5a" }}>
-                    “{item.quote}”
-                  </Typography>
-                  <Typography fontWeight="bold">{item.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.role} · {item.company}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
+            {loading ? (
+              <Typography>טוען...</Typography>
+            ) : testimonials.length > 0 ? (
+              testimonials.slice(0, 3).map((item, index) => (
+                <Card
+                  key={item.id || index}
+                  sx={{
+                    borderRadius: 3,
+                    boxShadow: 3,
+                    bgcolor: "#f8fafc",
+                    height: "100%",
+                  }}
+                >
+                  <CardContent>
+                    <Typography sx={{ mb: 2, color: "#1a2a5a" }}>
+                      "{item.quote}"
+                    </Typography>
+                    <Typography fontWeight="bold">{item.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {item.role} · {item.company}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Typography>אין המלצות להצגה</Typography>
+            )}
           </Box>
         </Box>
 

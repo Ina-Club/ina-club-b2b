@@ -4,7 +4,7 @@ import { AppBar, Toolbar, Box, Tabs, Tab, Button, Dialog } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useCallback } from "react";
-import { SignedIn, SignedOut, UserButton, SignIn, SignUp } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, SignIn } from "@clerk/nextjs";
 
 const SCROLL_SECTIONS = [
   { id: "why-us", label: "למה לבחור בנו?" },
@@ -15,7 +15,6 @@ const SCROLL_SECTIONS = [
 export default function Header() {
   const [currentTab, setCurrentTab] = useState(0);
   const [openAuth, setOpenAuth] = useState(false);
-  const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
 
   const handleTabClick = useCallback((index: number, id: string) => {
     setCurrentTab(index);
@@ -61,28 +60,16 @@ export default function Header() {
 
           {/* Auth buttons */}
           <SignedOut>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setMode("signIn");
-                  setOpenAuth(true);
-                }}
-                sx={authOutlined}
-              >
-                התחבר
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setMode("signUp");
-                  setOpenAuth(true);
-                }}
-                sx={authContained}
-              >
-                הרשמה
-              </Button>
-            </Box>
+            <Button
+              variant="contained"
+              onClick={() => {
+                setMode("signIn");
+                setOpenAuth(true);
+              }}
+              sx={authContained}
+            >
+              התחבר
+            </Button>
           </SignedOut>
 
           <SignedIn>
@@ -104,11 +91,7 @@ export default function Header() {
         }}
       >
         <Box>
-          {mode === "signIn" ? (
-            <SignIn appearance={clerkAppearance} routing="virtual" />
-          ) : (
-            <SignUp appearance={clerkAppearance} routing="virtual" />
-          )}
+          <SignIn appearance={clerkAppearance} routing="virtual" />
         </Box>
       </Dialog>
     </>

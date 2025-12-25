@@ -4,20 +4,15 @@ import { requireAuth, RoleLevel } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
-    const { session, response } = await requireAuth(RoleLevel.USER);
+    const { user, response } = await requireAuth(RoleLevel.USER);
     if (response) return response;
-
-    const user = await prisma.user.findUnique({
-      where: { email: session!.user!.email! },
-      select: { id: true },
-    });
 
     if (!user) {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
     }
 
     const b2bPackage = await prisma.b2BPackage.findUnique({
-      where: { userId: user.id },
+      where: { userId: user!.id },
       select: {
         id: true,
         packageType: true,
@@ -26,7 +21,7 @@ export async function GET(req: Request) {
         startDate: true,
         endDate: true,
         isActive: true,
-      },
+      },  
     });
 
     if (!b2bPackage) {

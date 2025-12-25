@@ -162,6 +162,7 @@ export default async function Page() {
       }}
     >
         <SignIn
+          signUpUrl={undefined}
           appearance={{
             variables: {
               colorPrimary: "#1a2a5a",

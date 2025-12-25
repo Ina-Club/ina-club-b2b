@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Card, Box, Typography, Button } from "@mui/material";
 import { PricingPlan } from "./pricing.config";
+import PackageSelectionDialog from "./package-selection-dialog";
 
 export default function PricingCard({ plan }: { plan: PricingPlan }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
   return (
     <Card
       sx={{
@@ -77,6 +80,7 @@ export default function PricingCard({ plan }: { plan: PricingPlan }) {
       <Button
         fullWidth
         variant="contained"
+        onClick={() => setDialogOpen(true)}
         sx={{
           bgcolor: "#1a2a5a",
           borderRadius: 3,
@@ -88,6 +92,12 @@ export default function PricingCard({ plan }: { plan: PricingPlan }) {
       >
         בחר חבילה
       </Button>
+
+      <PackageSelectionDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        plan={plan}
+      />
     </Card>
   );
 }

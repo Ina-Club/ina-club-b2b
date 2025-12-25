@@ -126,7 +126,6 @@ export default function PackagesPage() {
   if (status === "loading") {
     return (
       <>
-        <Header />
         <Box
           sx={{
             display: "flex",
@@ -137,14 +136,12 @@ export default function PackagesPage() {
         >
           <CircularProgress />
         </Box>
-        <Footer />
       </>
     );
   }
 
   return (
     <>
-      <Header />
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Box sx={{ textAlign: "center", mb: 6 }}>
           <Typography variant="h1" component="h1" gutterBottom>
@@ -220,8 +217,7 @@ export default function PackagesPage() {
           ))}
         </Grid>
       </Container>
-      <Footer />
-    </>
-  );
+      </>
+    );
 }
 

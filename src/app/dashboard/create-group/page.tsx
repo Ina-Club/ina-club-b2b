@@ -130,7 +130,6 @@ export default function CreateGroupPage() {
   if (loading) {
     return (
       <>
-        <Header />
         <Box
           sx={{
             display: "flex",
@@ -141,14 +140,12 @@ export default function CreateGroupPage() {
         >
           <CircularProgress />
         </Box>
-        <Footer />
       </>
     );
   }
 
   return (
     <>
-      <Header />
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
           <Button
@@ -300,7 +297,6 @@ export default function CreateGroupPage() {
           </CardContent>
         </Card>
       </Container>
-      <Footer />
     </>
   );
 }

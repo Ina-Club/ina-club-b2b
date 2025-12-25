@@ -9,7 +9,8 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
+  CircularProgress,
+  Alert,
   Table,
   TableBody,
   TableCell,
@@ -19,8 +20,6 @@ import {
   Paper,
   Chip,
   IconButton,
-  CircularProgress,
-  Alert,
 } from "@mui/material";
 import { Add, Visibility, Edit } from "@mui/icons-material";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
@@ -40,13 +39,12 @@ interface ActiveGroup {
   maxParticipants?: number;
 }
 
-export default function DashboardPage() {
+export default function GroupsPage() {
   const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const [activeGroups, setActiveGroups] = useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const [b2bPackage, setB2bPackage] = useState<any>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -55,34 +53,22 @@ export default function DashboardPage() {
       return;
     }
 
-    fetchDashboardData();
+    fetchGroups();
   }, [isLoaded, isSignedIn, router]);
 
-  const fetchDashboardData = async () => {
+  const fetchGroups = async () => {
     try {
       setLoading(true);
-      const [groupsRes, packageRes] = await Promise.all([
-        fetch("/api/active-groups/my-groups"),
-        fetch("/api/user/b2b-package"),
-      ]);
-
-      if (!groupsRes.ok) {
+      const res = await fetch("/api/active-groups/my-groups");
+      
+      if (!res.ok) {
         throw new Error("שגיאה בטעינת הקבוצות");
       }
 
-      const groupsData = await groupsRes.json();
-      setActiveGroups(groupsData.activeGroups || []);
-
-      if (packageRes.ok) {
-        const packageData = await packageRes.json();
-        setB2bPackage(packageData.package);
-      } else if (packageRes.status === 404) {
-        // No package found, redirect to package selection
-        router.push("/packages");
-        return;
-      }
+      const data = await res.json();
+      setActiveGroups(data.activeGroups || []);
     } catch (err: any) {
-      setError(err.message || "שגיאה בטעינת הנתונים");
+      setError(err.message || "שגיאה בטעינת הקבוצות");
     } finally {
       setLoading(false);
     }
@@ -139,29 +125,22 @@ export default function DashboardPage() {
     <DashboardLayout>
       <Box>
         <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="h1">לוח בקרה</Typography>
+          <Typography variant="h4" sx={{ fontWeight: "bold", color: "#1a2a5a" }}>
+            הקבוצות שלי
+          </Typography>
           <Button
             variant="contained"
             startIcon={<Add />}
             component={Link}
             href="/dashboard/create-group"
+            sx={{
+              backgroundColor: "#1a2a5a",
+              "&:hover": { backgroundColor: "#243a7a" },
+            }}
           >
             צור קבוצה חדשה
           </Button>
         </Box>
-
-        {b2bPackage && (
-          <Card sx={{ mb: 4 }}>
-            <CardContent>
-              <Typography variant="h2" gutterBottom>
-                החבילה שלך: {b2bPackage.packageType === "BASIC" ? "בסיסי" : b2bPackage.packageType === "PREMIUM" ? "פרימיום" : "ארגוני"}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                קבוצות פעילות: {activeGroups.length} / {b2bPackage.maxGroups}
-              </Typography>
-            </CardContent>
-          </Card>
-        )}
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -172,10 +151,10 @@ export default function DashboardPage() {
         {activeGroups.length === 0 ? (
           <Card>
             <CardContent sx={{ textAlign: "center", py: 8 }}>
-              <Typography variant="h2" gutterBottom>
+              <Typography variant="h6" gutterBottom>
                 אין קבוצות פעילות
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 התחל ליצור קבוצה פעילה חדשה
               </Typography>
               <Button

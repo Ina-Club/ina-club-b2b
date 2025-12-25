@@ -23,6 +23,8 @@
     "next-auth": "^4.24.11",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "recharts": "^3.6.0",
+    "resend": "^6.6.0",
     "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
