@@ -18,7 +18,7 @@ export function roleToLevel(role: Role): RoleLevel {
     case Role.USER:
       return RoleLevel.USER;
     case Role.BUSINESS:
-      return RoleLevel.BUSINESS;
+      return RoleLevel.BUSINESS 
     case Role.ADMIN:
       return RoleLevel.ADMIN;
     default:

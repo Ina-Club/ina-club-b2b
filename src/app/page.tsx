@@ -68,7 +68,7 @@ const tutorialVideos = [
 export default function HomePage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
-  const [partners, setPartners] = useState<any[]>([]);
+  const [companies, setCompanies] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,14 +81,14 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [partnersRes, testimonialsRes] = await Promise.all([
-          fetch("/api/partners"),
+        const [companiesRes, testimonialsRes] = await Promise.all([
+          fetch("/api/companies"),
           fetch("/api/testimonials"),
         ]);
 
-        if (partnersRes.ok) {
-          const partnersData = await partnersRes.json();
-          setPartners(partnersData.partners || []);
+        if (companiesRes.ok) {
+          const companiesData = await companiesRes.json();
+          setCompanies(companiesData.companies || []);
         }
 
         if (testimonialsRes.ok) {
@@ -369,9 +369,9 @@ export default function HomePage() {
           >
             {loading ? (
               <Typography>טוען...</Typography>
-            ) : partners.length > 0 ? (
-              partners.map((partner) => (
-                <Box key={partner.id || partner.name}>
+            ) : companies.length > 0 ? (
+              companies.map((company) => (
+                <Box key={company.id || company.name}>
                   <Card
                     sx={{
                       borderRadius: 3,
@@ -381,20 +381,23 @@ export default function HomePage() {
                     }}
                   >
                     <CardContent sx={{ textAlign: "center", py: 4 }}>
-                      <Box
-                        sx={{
-                          width: 64,
-                          height: 64,
-                          borderRadius: 2,
-                          mx: "auto",
-                          mb: 2,
-                        }}
-                      />
+                      {company.logo?.url && (
+                        <Box
+                          component="img"
+                          src={company.logo.url}
+                          alt={company.title}
+                          sx={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: 2,
+                            mx: "auto",
+                            mb: 2,
+                            objectFit: "contain",
+                          }}
+                        />
+                      )}
                       <Typography variant="h6" sx={{ color: "#1a2a5a", mb: 1 }}>
-                        {partner.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {partner.category}
+                        {company.title}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -474,7 +477,7 @@ export default function HomePage() {
                     </Typography>
                     <Typography fontWeight="bold">{item.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {item.role} · {item.company}
+                      {item.role} · {item.company?.title || item.companyName}
                     </Typography>
                   </CardContent>
                 </Card>

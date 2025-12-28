@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -73,23 +73,23 @@ const packages: Package[] = [
 ];
 
 export default function PackagesPage() {
-  const { data: session, status } = useSession();
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (status === "unauthenticated") {
-      router.push("/auth/signin?message=login_required");
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      router.push("/sign-in?redirect_url=/packages");
       return;
     }
-  }, [status, router]);
+  }, [isLoaded, isSignedIn, router]);
 
   const handleSelectPackage = async (pkg: Package) => {
-    if (!session) {
-      router.push("/auth/signin");
+    if (!isSignedIn) {
+      router.push("/sign-in");
       return;
     }
 
@@ -110,7 +110,7 @@ export default function PackagesPage() {
       }
 
       const data = await res.json();
-      
+
       // Redirect to payment page or dashboard
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
@@ -123,7 +123,7 @@ export default function PackagesPage() {
     }
   };
 
-  if (status === "loading") {
+  if (!isLoaded) {
     return (
       <>
         <Box
@@ -217,7 +217,7 @@ export default function PackagesPage() {
           ))}
         </Grid>
       </Container>
-      </>
-    );
+    </>
+  );
 }
 

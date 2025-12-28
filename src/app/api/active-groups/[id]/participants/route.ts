@@ -7,17 +7,17 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { session, response } = await requireAuth(RoleLevel.BUSINESS);
+    const { user, response } = await requireAuth(RoleLevel.BUSINESS);
     if (response) return response;
 
-    const user = await prisma.user.findUnique({
-      where: { email: session!.user!.email! },
-      select: { id: true },
-    });
+    // const user = await prisma.user.findUnique({
+    //   where: { email: user.email! },
+    //   select: { id: true },
+    // // });
 
-    if (!user) {
-      return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
-    }
+    // if (!user) {
+    //   return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
+    // }
 
     const activeGroup = await prisma.activeGroup.findFirst({
       where: {

@@ -7,6 +7,14 @@ export async function GET() {
       where: {
         isActive: true,
       },
+      include: {
+        company: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
       orderBy: {
         order: "asc",
       },

@@ -1,22 +1,34 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, RoleLevel } from "@/lib/auth";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const { session, response } = await requireAuth(RoleLevel.BUSINESS);
-    if (response) return response;
-
     const companies = await prisma.company.findMany({
+      where: {
+        verified: true,
+      },
+      select: {
+        id: true,
+        title: true,
+        logoId: true,
+        logo: {
+          select: {
+            url: true,
+          },
+        },
+      },
       orderBy: {
         title: "asc",
       },
     });
 
     return NextResponse.json({ companies });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "שגיאה בשליפת חברות" }, { status: 500 });
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    return NextResponse.json(
+      { error: "שגיאה בטעינת חברות" },
+      { status: 500 }
+    );
   }
 }
 

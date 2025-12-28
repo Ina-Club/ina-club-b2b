@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useUser } from "@clerk/nextjs";
 import { useRouter, useParams } from "next/navigation";
 import {
   Box,
@@ -41,7 +41,7 @@ interface GroupInfo {
 }
 
 export default function ParticipantsPage() {
-  const { data: session, status } = useSession();
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const params = useParams();
   const groupId = params.id as string;
@@ -52,16 +52,16 @@ export default function ParticipantsPage() {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (status === "unauthenticated") {
-      router.push("/auth/signin?message=login_required");
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      router.push("/sign-in");
       return;
     }
 
-    if (session && groupId) {
+    if (isSignedIn && groupId) {
       fetchParticipants();
     }
-  }, [session, status, router, groupId]);
+  }, [isSignedIn, isLoaded, router, groupId]);
 
   const fetchParticipants = async () => {
     try {

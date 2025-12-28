@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -32,7 +32,7 @@ interface Company {
 }
 
 export default function CreateGroupPage() {
-  const { data: session, status } = useSession();
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,16 +53,16 @@ export default function CreateGroupPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (status === "unauthenticated") {
-      router.push("/auth/signin?message=login_required");
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      router.push("/sign-in?redirect_url=/dashboard/create-group");
       return;
     }
 
-    if (session) {
+    if (isSignedIn) {
       fetchData();
     }
-  }, [session, status, router]);
+  }, [isSignedIn, isLoaded, router]);
 
   const fetchData = async () => {
     try {

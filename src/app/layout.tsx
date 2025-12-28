@@ -1,5 +1,4 @@
 import ThemeRegistry from "@/components/theme-registry/theme-registry";
-import SessionProviderWrapper from "@/components/wrapper/session-provider-wrapper";
 import { Box } from "@mui/material";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -35,13 +34,11 @@ export default function RootLayout({
               margin: 0,
             }}
           >
-            <SessionProviderWrapper>
-              <Box position="sticky" top={0} zIndex={1000}>
-                <Header />
-              </Box>{" "}
-              <main style={{ flex: 1 }}>{children}</main>
-              <Footer />
-            </SessionProviderWrapper>
+            <Box position="sticky" top={0} zIndex={1000}>
+              <Header />
+            </Box>{" "}
+            <main style={{ flex: 1 }}>{children}</main>
+            <Footer />
           </body>
         </html>
       </ThemeRegistry>

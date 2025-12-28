@@ -61,9 +61,10 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+
       const [groupsRes, packageRes] = await Promise.all([
-        fetch("/api/active-groups/my-groups"),
-        fetch("/api/user/b2b-package"),
+        fetch("/api/active-groups/my-groups", { credentials: "include" }),
+        fetch("/api/user/b2b-package", { credentials: "include" }),
       ]);
 
       if (!groupsRes.ok) {
@@ -77,7 +78,6 @@ export default function DashboardPage() {
         const packageData = await packageRes.json();
         setB2bPackage(packageData.package);
       } else if (packageRes.status === 404) {
-        // No package found, redirect to package selection
         router.push("/packages");
         return;
       }

@@ -31,7 +31,7 @@ export async function GET(req: Request) {
     // Check if package is still active
     if (b2bPackage.endDate && new Date() > b2bPackage.endDate) {
       await prisma.b2BPackage.update({
-        where: { id: b2bPackage.id },
+        where: { id: b2bPackage.id }, 
         data: { isActive: false },
       });
       return NextResponse.json({ error: "חבילה פגה" }, { status: 404 });
