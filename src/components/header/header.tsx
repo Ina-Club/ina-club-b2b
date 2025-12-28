@@ -63,7 +63,6 @@ export default function Header() {
             <Button
               variant="contained"
               onClick={() => {
-                setMode("signIn");
                 setOpenAuth(true);
               }}
               sx={authContained}
