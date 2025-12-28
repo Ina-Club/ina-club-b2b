@@ -14,9 +14,10 @@ export async function GET(req: Request) {
     // Get user's company and its categories
     const userWithCompany = await prisma.user.findUnique({
       where: { id: user.id },
-      include: {
+      select: {
+        companyId: true,
         company: {
-          include: {
+          select: {
             categories: true,
           },
         },

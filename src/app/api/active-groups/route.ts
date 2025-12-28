@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, getUserIdBySession, RoleLevel } from "@/lib/auth";
+import { requireAuth, RoleLevel } from "@/lib/auth";
 import { GroupStatus } from "@prisma/client";
 
 export async function GET(req: Request) {
   try {
-    const { session, response } = await requireAuth(RoleLevel.BUSINESS);
+    const { user, response } = await requireAuth(RoleLevel.BUSINESS);
     if (response) return response;
 
-    const userId = await getUserIdBySession(session!);
+    const userId = user!.id;
 
     const activeGroups = await prisma.activeGroup.findMany({
       where: {
@@ -52,10 +52,10 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { session, response } = await requireAuth(RoleLevel.BUSINESS);
+    const { user, response } = await requireAuth(RoleLevel.BUSINESS);
     if (response) return response;
 
-    const userId = await getUserIdBySession(session!);
+    const userId = user!.id;
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { b2bPackage: true },
