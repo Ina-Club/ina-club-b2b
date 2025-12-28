@@ -10,15 +10,17 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-  TextField,
-  Button,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Chip,
+  Avatar,
+  Grid,
+  Divider,
 } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LanguageIcon from "@mui/icons-material/Language";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
 
 interface Company {
@@ -35,31 +37,12 @@ interface Company {
   logo: string | null;
 }
 
-interface Category {
-  id: string;
-  name: string;
-}
-
 export default function CompanyPage() {
   const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const [company, setCompany] = useState<Company | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState(false);
-
-  const [formData, setFormData] = useState({
-    title: "",
-    websiteUrl: "",
-    description: "",
-    phone: "",
-    email: "",
-    address: "",
-    city: "",
-    categoryIds: [] as string[],
-  });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -68,235 +51,134 @@ export default function CompanyPage() {
       return;
     }
 
-    fetchData();
-  }, [isLoaded, isSignedIn, router]);
+    fetchCompany();
+  }, [isLoaded, isSignedIn]);
 
-  const fetchData = async () => {
+  const fetchCompany = async () => {
     try {
       setLoading(true);
-      const [companyRes, categoriesRes] = await Promise.all([
-        fetch("/api/company"),
-        fetch("/api/categories"),
-      ]);
+      const res = await fetch("/api/company");
+      if (!res.ok) throw new Error("שגיאה בטעינת פרטי החברה");
 
-      if (companyRes.ok) {
-        const companyData = await companyRes.json();
-        if (companyData.company) {
-          setCompany(companyData.company);
-          setFormData({
-            title: companyData.company.title || "",
-            websiteUrl: companyData.company.websiteUrl || "",
-            description: companyData.company.description || "",
-            phone: companyData.company.phone || "",
-            email: companyData.company.email || "",
-            address: companyData.company.address || "",
-            city: companyData.company.city || "",
-            categoryIds: companyData.company.categories.map((c: any) => c.id),
-          });
-        }
-      }
-
-      if (categoriesRes.ok) {
-        const categoriesData = await categoriesRes.json();
-        setCategories(categoriesData.categories || []);
-      }
+      const data = await res.json();
+      setCompany(data.company);
     } catch (err: any) {
-      setError(err.message || "שגיאה בטעינת הנתונים");
+      setError(err.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
-    setSuccess(false);
-
-    try {
-      const res = await fetch("/api/company", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) {
-        throw new Error("שגיאה בשמירת הנתונים");
-      }
-
-      setSuccess(true);
-      fetchData();
-    } catch (err: any) {
-      setError(err.message || "שגיאה בשמירת הנתונים");
-    } finally {
-      setSaving(false);
     }
   };
 
   if (!isLoaded || loading) {
     return (
       <DashboardLayout>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "60vh",
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "center", minHeight: "60vh" }}>
           <CircularProgress />
         </Box>
       </DashboardLayout>
     );
   }
 
+  if (!company) {
+    return (
+      <DashboardLayout>
+        <Alert severity="info">לא נמצאה חברה</Alert>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
-      <Box>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold", color: "#1a2a5a" }}>
-          פרטי החברה
-        </Typography>
+      <Card sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
+        <CardContent>
+          {/* Logo + Title */}
+          <Box sx={{ textAlign: "center", mb: 3 }}>
+            <Avatar
+              src={company.logo || undefined}
+              alt={company.title}
+              sx={{
+                width: 120,
+                height: 120,
+                mx: "auto",
+                mb: 2,
+                boxShadow: 3,
+              }}
+            />
+            <Typography variant="h4" fontWeight="bold">
+              {company.title}
+              {company.verified && (
+                <CheckCircleIcon
+                  color="success"
+                  sx={{ ml: 1, verticalAlign: "middle" }}
+                />
+              )}
+            </Typography>
+          </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+          {/* Description */}
+          {company.description && (
+            <Typography sx={{ mb: 3, textAlign: "center", color: "text.secondary" }}>
+              {company.description}
+            </Typography>
+          )}
 
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            הנתונים נשמרו בהצלחה
-          </Alert>
-        )}
+          <Divider sx={{ mb: 3 }} />
 
-        <Card>
-          <CardContent>
-            <form onSubmit={handleSubmit}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="שם החברה *"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    fullWidth
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="אתר אינטרנט"
-                    value={formData.websiteUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, websiteUrl: e.target.value })
-                    }
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="תיאור החברה"
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    fullWidth
-                    multiline
-                    rows={4}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="טלפון"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="אימייל"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="כתובת"
-                    value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="עיר"
-                    value={formData.city}
-                    onChange={(e) =>
-                      setFormData({ ...formData, city: e.target.value })
-                    }
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>קטגוריות</InputLabel>
-                    <Select
-                      multiple
-                      value={formData.categoryIds}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          categoryIds: e.target.value as string[],
-                        })
-                      }
-                      renderValue={(selected) => (
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                          {selected.map((value) => {
-                            const category = categories.find((c) => c.id === value);
-                            return (
-                              <Chip key={value} label={category?.name || value} size="small" />
-                            );
-                          })}
-                        </Box>
-                      )}
-                    >
-                      {categories.map((category) => (
-                        <MenuItem key={category.id} value={category.id}>
-                          {category.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={saving}
-                    sx={{
-                      backgroundColor: "#1a2a5a",
-                      "&:hover": { backgroundColor: "#243a7a" },
-                    }}
-                  >
-                    {saving ? <CircularProgress size={24} /> : "שמור שינויים"}
-                  </Button>
-                </Grid>
+          {/* Details */}
+          <Grid container spacing={2}>
+            {company.address && (
+              <Grid item xs={12} md={6}>
+                <Detail icon={<LocationOnIcon />} text={`${company.address}, ${company.city}`} />
               </Grid>
-            </form>
-          </CardContent>
-        </Card>
-      </Box>
+            )}
+            {company.phone && (
+              <Grid item xs={12} md={6}>
+                <Detail icon={<PhoneIcon />} text={company.phone} />
+              </Grid>
+            )}
+            {company.email && (
+              <Grid item xs={12} md={6}>
+                <Detail icon={<EmailIcon />} text={company.email} />
+              </Grid>
+            )}
+            {company.websiteUrl && (
+              <Grid item xs={12} md={6}>
+                <Detail
+                  icon={<LanguageIcon />}
+                  text={
+                    <a href={company.websiteUrl} target="_blank" rel="noreferrer">
+                      {company.websiteUrl}
+                    </a>
+                  }
+                />
+              </Grid>
+            )}
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Categories */}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              קטגוריות
+            </Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {company.categories.map((c) => (
+                <Chip key={c.id} label={c.name} />
+              ))}
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
     </DashboardLayout>
   );
 }
 
+function Detail({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {icon}
+      <Typography>{text}</Typography>
+    </Box>
+  );
+}

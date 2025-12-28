@@ -95,8 +95,8 @@ export async function PUT(req: Request) {
           },
           categories: categoryIds
             ? {
-                connect: categoryIds.map((id: string) => ({ id })),
-              }
+              connect: categoryIds.map((id: string) => ({ id })),
+            }
             : undefined,
         },
       });
@@ -113,8 +113,8 @@ export async function PUT(req: Request) {
           city,
           categories: categoryIds
             ? {
-                set: categoryIds.map((id: string) => ({ id })),
-              }
+              set: categoryIds.map((id: string) => ({ id })),
+            }
             : undefined,
         },
         include: {
