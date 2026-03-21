@@ -91,6 +91,7 @@ export async function PUT(
             imageUrls,
             minParticipants,
             maxParticipants,
+            registrationTerms,
         } = body;
 
         // Validate essential fields
@@ -119,6 +120,7 @@ export async function PUT(
                 deadline: new Date(deadline),
                 minParticipants: minParticipants ? parseInt(minParticipants) : null,
                 maxParticipants: maxParticipants ? parseInt(maxParticipants) : null,
+                registrationTerms: registrationTerms || "",
             },
         });
 

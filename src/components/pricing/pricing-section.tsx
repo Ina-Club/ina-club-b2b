@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Grid, Container } from "@mui/material";
+import { Box, Typography, Container } from "@mui/material";
 import { PRICING_PLANS } from "./pricing.config";
 import PricingCard from "./pricing-card";
 
@@ -33,13 +33,19 @@ export default function PricingSection() {
           אפשרויות
         </Typography>
 
-        <Grid container spacing={4} justifyContent="center">
+        <Box
+          sx={{
+            display: "grid",
+            gap: 4,
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+          }}
+        >
           {PRICING_PLANS.map((plan) => (
-            <Grid key={plan.id} xs={12} md={4} item={true}>
+            <Box key={plan.id}>
               <PricingCard plan={plan} />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );

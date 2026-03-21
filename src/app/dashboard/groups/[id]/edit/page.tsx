@@ -81,6 +81,7 @@ export default function EditGroupPage() {
                 deadline: new Date(g.deadline).toISOString().slice(0, 16),
                 minParticipants: g.minParticipants?.toString() || "",
                 maxParticipants: g.maxParticipants?.toString() || "",
+                registrationTerms: g.registrationTerms || "",
                 imageUrls: g.images.map((img: any) => img.image.url),
             });
 

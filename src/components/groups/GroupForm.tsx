@@ -36,6 +36,7 @@ export interface GroupFormData {
     deadline: string;
     minParticipants: string;
     maxParticipants: string;
+    registrationTerms: string;
     imageUrls: string[];
 }
 
@@ -69,6 +70,7 @@ export default function GroupForm({
             deadline: "",
             minParticipants: "",
             maxParticipants: "",
+            registrationTerms: "",
             imageUrls: [],
         }
     );
@@ -156,6 +158,16 @@ export default function GroupForm({
                     multiline
                     rows={4}
                     fullWidth
+                />
+
+                <TextField
+                    label="תנאי הרשמה לקבוצה (אופציונלי)"
+                    value={formData.registrationTerms}
+                    onChange={(e) => handleChange("registrationTerms", e.target.value)}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    helperText="תנאים שחברי מועדון יצטרכו לאשר לפני ההצטרפות (למשל: תנאי ביטול, זמני אספקה, איסוף עצמי בלבד וכו׳)"
                 />
 
                 <TextField

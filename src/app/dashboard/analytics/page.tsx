@@ -10,7 +10,6 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-  Grid,
   Paper,
 } from "@mui/material";
 // Charts will be added when recharts is installed
@@ -124,8 +123,15 @@ export default function AnalyticsPage() {
         </Typography>
 
         {/* Summary Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
+        <Box
+          sx={{
+            mb: 4,
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(4, 1fr)" },
+          }}
+        >
+          <Box>
             <Card>
               <CardContent>
                 <Typography variant="h6" color="text.secondary">
@@ -136,8 +142,8 @@ export default function AnalyticsPage() {
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          </Box>
+          <Box>
             <Card>
               <CardContent>
                 <Typography variant="h6" color="text.secondary">
@@ -148,8 +154,8 @@ export default function AnalyticsPage() {
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          </Box>
+          <Box>
             <Card>
               <CardContent>
                 <Typography variant="h6" color="text.secondary">
@@ -160,8 +166,8 @@ export default function AnalyticsPage() {
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          </Box>
+          <Box>
             <Card>
               <CardContent>
                 <Typography variant="h6" color="text.secondary">
@@ -172,13 +178,19 @@ export default function AnalyticsPage() {
                 </Typography>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* Charts */}
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+          }}
+        >
           {data.monthlyRevenue.length > 0 && (
-            <Grid item xs={12} md={6}>
+            <Box>
               <Card>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 2 }}>
@@ -201,11 +213,11 @@ export default function AnalyticsPage() {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           )}
 
           {data.categoryStats.length > 0 && (
-            <Grid item xs={12} md={6}>
+            <Box>
               <Card>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 2 }}>
@@ -228,9 +240,9 @@ export default function AnalyticsPage() {
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           )}
-        </Grid>
+        </Box>
       </Box>
     </DashboardLayout>
   );

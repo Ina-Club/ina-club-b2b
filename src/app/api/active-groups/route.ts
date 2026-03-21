@@ -17,18 +17,7 @@ export async function GET(req: Request) {
       include: {
         category: true,
         company: true,
-        participants: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
+        participants: true,
         images: {
           include: {
             image: true,
@@ -56,12 +45,13 @@ export async function POST(req: Request) {
     if (response) return response;
 
     const userId = user!.id;
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { b2bPackage: true },
+    
+    // Check package directly via userId
+    const b2bPackage = await prisma.b2BPackage.findUnique({
+      where: { userId },
     });
 
-    if (!user?.b2bPackage || !user.b2bPackage.isActive) {
+    if (!b2bPackage || !b2bPackage.isActive) {
       return NextResponse.json({ error: "אין לך חבילה פעילה" }, { status: 403 });
     }
 
@@ -72,12 +62,12 @@ export async function POST(req: Request) {
       },
     });
 
-    if (activeGroupsCount >= user.b2bPackage.maxGroups) {
+    if (activeGroupsCount >= b2bPackage.maxGroups) {
       return NextResponse.json({ error: "הגעת למגבלת הקבוצות בחבילה שלך" }, { status: 403 });
     }
 
     const body = await req.json();
-    const { title, description, categoryId, companyId, basePrice, groupPrice, deadline, imageUrls, minParticipants, maxParticipants } = body;
+    const { title, description, categoryId, companyId, basePrice, groupPrice, deadline, imageUrls, minParticipants, maxParticipants, registrationTerms } = body;
 
     if (!title || !description || !categoryId || !companyId || !basePrice || !groupPrice || !deadline) {
       return NextResponse.json({ error: "כל השדות נדרשים" }, { status: 400 });
@@ -96,6 +86,7 @@ export async function POST(req: Request) {
         createdById: userId,
         minParticipants: minParticipants ? parseInt(minParticipants) : null,
         maxParticipants: maxParticipants ? parseInt(maxParticipants) : null,
+        registrationTerms: registrationTerms || "",
       },
     });
 
@@ -115,4 +106,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "שגיאה ביצירת קבוצה" }, { status: 500 });
   }
 }
-

@@ -15,32 +15,21 @@ export async function GET(req: Request) {
     const activeGroups = await prisma.activeGroup.findMany({
       where: { createdById: user.id },
       include: {
-        participants: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
+        participants: true,
       },
     });
 
     // Collect all unique participants
     const participantsMap = new Map();
-    
+
     activeGroups.forEach((group) => {
       group.participants.forEach((participant) => {
         if (!participantsMap.has(participant.userId)) {
           participantsMap.set(participant.userId, {
             userId: participant.userId,
-            name: participant.user.name,
-            email: participant.user.email,
-            phone: participant.user.phone,
+            name: "משתמש",
+            email: "",
+            phone: "",
             groups: [],
           });
         }

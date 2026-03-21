@@ -90,7 +90,10 @@ export default function Header() {
         }}
       >
         <Box>
-          <SignIn appearance={clerkAppearance} routing="virtual" />
+          <SignIn
+            appearance={clerkAppearance}
+            routing="virtual"
+          />
         </Box>
       </Dialog>
     </>
@@ -126,6 +129,7 @@ const clerkAppearance = {
     fontFamily: '"Inter", sans-serif',
   },
   elements: {
+    footerAction: { display: "none" },
     card: {
       direction: "rtl",
       textAlign: "right",

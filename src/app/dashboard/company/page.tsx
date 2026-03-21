@@ -12,7 +12,6 @@ import {
   Alert,
   Chip,
   Avatar,
-  Grid,
   Divider,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -125,24 +124,30 @@ export default function CompanyPage() {
           <Divider sx={{ mb: 3 }} />
 
           {/* Details */}
-          <Grid container spacing={2}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2,
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            }}
+          >
             {company.address && (
-              <Grid item xs={12} md={6}>
+              <Box>
                 <Detail icon={<LocationOnIcon />} text={`${company.address}, ${company.city}`} />
-              </Grid>
+              </Box>
             )}
             {company.phone && (
-              <Grid item xs={12} md={6}>
+              <Box>
                 <Detail icon={<PhoneIcon />} text={company.phone} />
-              </Grid>
+              </Box>
             )}
             {company.email && (
-              <Grid item xs={12} md={6}>
+              <Box>
                 <Detail icon={<EmailIcon />} text={company.email} />
-              </Grid>
+              </Box>
             )}
             {company.websiteUrl && (
-              <Grid item xs={12} md={6}>
+              <Box>
                 <Detail
                   icon={<LanguageIcon />}
                   text={
@@ -151,9 +156,9 @@ export default function CompanyPage() {
                     </a>
                   }
                 />
-              </Grid>
+              </Box>
             )}
-          </Grid>
+          </Box>
 
           <Divider sx={{ my: 3 }} />
 

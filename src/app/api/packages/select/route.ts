@@ -11,7 +11,7 @@ const PACKAGE_CONFIG: Record<PackageType, { maxGroups: number; price: number }> 
 
 export async function POST(req: Request) {
   try {
-    const { session, response } = await requireAuth(RoleLevel.USER);
+    const { user, response } = await requireAuth(RoleLevel.USER);
     if (response) return response;
 
     const body = await req.json();
@@ -21,22 +21,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "סוג חבילה לא תקין" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session!.user!.email! },
-      select: { id: true, role: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
-    }
-
-    // Update user role to BUSINESS if not already
-    if (user.role !== "BUSINESS" && user.role !== "ADMIN") {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { role: "BUSINESS" },
-      });
-    }
+    const userId = user!.id;
 
     const config = PACKAGE_CONFIG[packageType];
     const endDate = new Date();
@@ -44,14 +29,14 @@ export async function POST(req: Request) {
 
     // Check if user already has a package
     const existingPackage = await prisma.b2BPackage.findUnique({
-      where: { userId: user.id },
+      where: { userId: userId },
     });
 
     let b2bPackage;
     if (existingPackage) {
       // Update existing package
       b2bPackage = await prisma.b2BPackage.update({
-        where: { userId: user.id },
+        where: { userId: userId },
         data: {
           packageType,
           maxGroups: config.maxGroups,
@@ -65,7 +50,7 @@ export async function POST(req: Request) {
       // Create new package
       b2bPackage = await prisma.b2BPackage.create({
         data: {
-          userId: user.id,
+          userId: userId,
           packageType,
           maxGroups: config.maxGroups,
           price: config.price,
@@ -87,7 +72,6 @@ export async function POST(req: Request) {
     });
 
     // For now, we'll mark payment as completed (in production, integrate with payment gateway)
-    // In a real scenario, you would redirect to a payment gateway and handle webhook callbacks
     await prisma.payment.updateMany({
       where: { b2bPackageId: b2bPackage.id, status: "PENDING" },
       data: { status: "COMPLETED" },
@@ -96,12 +80,9 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       package: b2bPackage,
-      // In production, return payment URL here
-      // paymentUrl: paymentGatewayUrl
     });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "שגיאה בבחירת החבילה" }, { status: 500 });
   }
 }
-

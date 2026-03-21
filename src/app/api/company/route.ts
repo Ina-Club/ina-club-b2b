@@ -11,38 +11,35 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
     }
 
-    const userWithCompany = await prisma.user.findUnique({
-      where: { id: user.id },
+    console.log(user);
+    const company = await prisma.company.findFirst({
+      where: { ownerId: user.id },
       include: {
-        company: {
-          include: {
-            categories: true,
-            logo: true,
-          },
-        },
+        categories: true,
+        logo: true,
       },
     });
 
-    if (!userWithCompany?.company) {
+    if (!company) {
       return NextResponse.json({ company: null });
     }
 
     return NextResponse.json({
       company: {
-        id: userWithCompany.company.id,
-        title: userWithCompany.company.title,
-        websiteUrl: userWithCompany.company.websiteUrl,
-        description: userWithCompany.company.description,
-        phone: userWithCompany.company.phone,
-        email: userWithCompany.company.email,
-        address: userWithCompany.company.address,
-        city: userWithCompany.company.city,
-        verified: userWithCompany.company.verified,
-        categories: userWithCompany.company.categories.map((c) => ({
+        id: company.id,
+        title: company.title,
+        websiteUrl: company.websiteUrl,
+        description: company.description,
+        phone: company.phone,
+        email: company.email,
+        address: company.address,
+        city: company.city,
+        verified: company.verified,
+        categories: company.categories.map((c) => ({
           id: c.id,
           name: c.name,
         })),
-        logo: userWithCompany.company.logo?.url,
+        logo: company.logo?.url,
       },
     });
   } catch (e) {
@@ -77,7 +74,7 @@ export async function PUT(req: Request) {
 
     // Get or create company
     let company = await prisma.company.findFirst({
-      where: { owner: { id: user.id } },
+      where: { ownerId: user.id },
     });
 
     if (!company) {
@@ -90,9 +87,7 @@ export async function PUT(req: Request) {
           email,
           address,
           city,
-          owner: {
-            connect: { id: user.id },
-          },
+          ownerId: user.id,
           categories: categoryIds
             ? {
               connect: categoryIds.map((id: string) => ({ id })),
@@ -132,4 +127,3 @@ export async function PUT(req: Request) {
     );
   }
 }
-

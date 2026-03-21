@@ -10,7 +10,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   List,
   ListItem,
   ListItemText,
@@ -158,9 +157,15 @@ export default function PackagesPage() {
           </Alert>
         )}
 
-        <Grid container spacing={4}>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 4,
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+          }}
+        >
           {packages.map((pkg) => (
-            <Grid item xs={12} md={4} key={pkg.type}>
+            <Box key={pkg.type}>
               <Card
                 sx={{
                   height: "100%",
@@ -213,9 +218,9 @@ export default function PackagesPage() {
                   </Button>
                 </Box>
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </>
   );

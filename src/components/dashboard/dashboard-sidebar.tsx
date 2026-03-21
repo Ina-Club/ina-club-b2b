@@ -38,10 +38,10 @@ const menuItems = [
     path: "/dashboard/groups",
   },
   {
-    id: "requests",
-    label: "בקשות רלוונטיות",
+    id: "wish-items",
+    label: "מוצרים מבוקשים",
     icon: RequestQuote,
-    path: "/dashboard/requests",
+    path: "/dashboard/wish-items",
   },
   {
     id: "analytics",

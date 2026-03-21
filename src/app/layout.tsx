@@ -25,7 +25,7 @@ export default function RootLayout({
       signUpUrl={undefined}
     >
       <ThemeRegistry>
-        <html lang="he" dir="rtl">
+        <html lang="he" dir="rtl" suppressHydrationWarning>
           <body
             style={{
               display: "flex",
@@ -36,8 +36,10 @@ export default function RootLayout({
           >
             <Box position="sticky" top={0} zIndex={1000}>
               <Header />
-            </Box>{" "}
-            <main style={{ flex: 1 }}>{children}</main>
+            </Box>
+            <main style={{ flex: 1 }}>
+              {children}
+            </main>
             <Footer />
           </body>
         </html>

@@ -11,11 +11,10 @@ import {
   CircularProgress,
   Alert,
   Chip,
-  Grid,
 } from "@mui/material";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
 
-interface RequestGroup {
+interface WishItem {
   id: string;
   title: string;
   description: string;
@@ -28,10 +27,10 @@ interface RequestGroup {
   };
 }
 
-export default function RequestsPage() {
+export default function WishItemsPage() {
   const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
-  const [requestGroups, setRequestGroups] = useState<RequestGroup[]>([]);
+  const [wishItems, setWishItems] = useState<WishItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
@@ -42,22 +41,22 @@ export default function RequestsPage() {
       return;
     }
 
-    fetchRequests();
+    fetchWishItems();
   }, [isLoaded, isSignedIn, router]);
 
-  const fetchRequests = async () => {
+  const fetchWishItems = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/request-groups/relevant");
+      const res = await fetch("/api/wish-items/relevant");
       
       if (!res.ok) {
-        throw new Error("שגיאה בטעינת הבקשות");
+        throw new Error("שגיאה בטעינת המוצרים המבוקשים");
       }
 
       const data = await res.json();
-      setRequestGroups(data.requestGroups || []);
+      setWishItems(data.wishItems || []);
     } catch (err: any) {
-      setError(err.message || "שגיאה בטעינת הבקשות");
+      setError(err.message || "שגיאה בטעינת המוצרים המבוקשים");
     } finally {
       setLoading(false);
     }
@@ -84,7 +83,7 @@ export default function RequestsPage() {
     <DashboardLayout>
       <Box>
         <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold", color: "#1a2a5a" }}>
-          בקשות רלוונטיות
+          מוצרים מבוקשים (Wish Items)
         </Typography>
 
         {error && (
@@ -93,45 +92,51 @@ export default function RequestsPage() {
           </Alert>
         )}
 
-        {requestGroups.length === 0 ? (
+        {wishItems.length === 0 ? (
           <Card>
             <CardContent sx={{ textAlign: "center", py: 8 }}>
               <Typography variant="h6" gutterBottom>
-                אין בקשות רלוונטיות כרגע
+                אין בחנות שלך מוצרים מבוקשים כרגע
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                בקשות חדשות יופיעו כאן בהתאם לתחום העיסוק של החברה שלך
+                מוצרים שמבוקשים על ידי משתמשים יופיעו כאן בהתאם לקטגוריות העסק שלך
               </Typography>
             </CardContent>
           </Card>
         ) : (
-          <Grid container spacing={3}>
-            {requestGroups.map((request) => (
-              <Grid item xs={12} md={6} key={request.id}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            }}
+          >
+            {wishItems.map((item) => (
+              <Box key={item.id}>
                 <Card sx={{ height: "100%" }}>
                   <CardContent>
                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                       <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                        {request.title}
+                        {item.title}
                       </Typography>
-                      <Chip label={request.category} size="small" color="primary" />
+                      <Chip label={item.category} size="small" color="primary" />
                     </Box>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {request.description}
+                      {item.description}
                     </Typography>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography variant="body2" color="text.secondary">
-                        {request.participantsCount} משתתפים
+                        {item.participantsCount} מתעניינים
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {new Date(request.createdAt).toLocaleDateString("he-IL")}
+                        {new Date(item.createdAt).toLocaleDateString("he-IL")}
                       </Typography>
                     </Box>
                   </CardContent>
                 </Card>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         )}
       </Box>
     </DashboardLayout>

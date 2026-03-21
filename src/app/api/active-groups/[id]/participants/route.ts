@@ -1,27 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, RoleLevel } from "@/lib/auth";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { user, response } = await requireAuth(RoleLevel.BUSINESS);
-    if (response) return response;
-
-    // const user = await prisma.user.findUnique({
-    //   where: { email: user.email! },
-    //   select: { id: true },
-    // // });
-
-    // if (!user) {
-    //   return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
-    // }
+    const { user, response: authResponse } = await requireAuth(RoleLevel.BUSINESS);
+    if (authResponse) return authResponse;
+    if (!user) {
+      return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
+    }
+    const { id } = await params;
 
     const activeGroup = await prisma.activeGroup.findFirst({
       where: {
-        id: params.id,
+        id,
         createdById: user.id, // Ensure user owns this group
       },
       select: {
@@ -32,14 +28,7 @@ export async function GET(
           select: {
             id: true,
             joinedAt: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-              },
-            },
+            userId: true,
           },
           orderBy: { joinedAt: "desc" },
         },
@@ -50,12 +39,27 @@ export async function GET(
       return NextResponse.json({ error: "קבוצה לא נמצאה" }, { status: 404 });
     }
 
-    const participants = activeGroup.participants.map((p) => ({
-      id: p.id,
-      name: p.user.name || "",
-      email: p.user.email,
-      phone: p.user.phone,
-      joinedAt: p.joinedAt.toISOString(),
+    // Fetch user details from Clerk for each participant
+    const client = await clerkClient();
+    const participants = await Promise.all(activeGroup.participants.map(async (p) => {
+      try {
+        const clerkUser = await client.users.getUser(p.userId);
+        return {
+          id: p.id,
+          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || clerkUser.username || "משתמש",
+          email: clerkUser.emailAddresses[0]?.emailAddress || "",
+          phone: clerkUser.phoneNumbers[0]?.phoneNumber || "",
+          joinedAt: p.joinedAt.toISOString(),
+        };
+      } catch (err) {
+        return {
+          id: p.id,
+          name: "משתמש לא ידוע",
+          email: "",
+          phone: "",
+          joinedAt: p.joinedAt.toISOString(),
+        };
+      }
     }));
 
     return NextResponse.json({
@@ -72,4 +76,3 @@ export async function GET(
     return NextResponse.json({ error: "שגיאה בשליפת המשתתפים" }, { status: 500 });
   }
 }
-
