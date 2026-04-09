@@ -40,6 +40,7 @@ interface Participant {
   email: string;
   phone: string | null;
   joinedAt: string;
+  couponCode?: string | null;
 }
 
 interface GroupInfo {
@@ -301,6 +302,9 @@ export default function ParticipantsPage() {
                   <TableCell>אימייל</TableCell>
                   <TableCell>טלפון</TableCell>
                   <TableCell>תאריך הצטרפות</TableCell>
+                  {(groupInfo?.status === "ACTIVATED" || groupInfo?.status === "RESOLVED") && (
+                    <TableCell align="center">קוד קופון</TableCell>
+                  )}
                   {groupInfo?.status === "ACTIVATED" && (
                     <TableCell align="center">לא הופיע (חיוב פיקדון)</TableCell>
                   )}
@@ -321,6 +325,15 @@ export default function ParticipantsPage() {
                         minute: "2-digit",
                       })}
                     </TableCell>
+                    {(groupInfo?.status === "ACTIVATED" || groupInfo?.status === "RESOLVED") && (
+                      <TableCell align="center">
+                        {participant.couponCode ? (
+                          <Chip label={participant.couponCode} size="small" variant="outlined" color="primary" />
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">-</Typography>
+                        )}
+                      </TableCell>
+                    )}
                     {groupInfo?.status === "ACTIVATED" && (
                       <TableCell align="center">
                         <Checkbox

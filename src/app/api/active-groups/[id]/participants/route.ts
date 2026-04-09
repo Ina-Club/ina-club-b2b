@@ -33,6 +33,12 @@ export async function GET(
           },
           orderBy: { joinedAt: "desc" },
         },
+        coupons: {
+          select: {
+            userId: true,
+            code: true,
+          }
+        }
       },
     });
 
@@ -44,6 +50,7 @@ export async function GET(
     const b2cClient = createClerkClient({ secretKey: process.env.B2C_CLERK_SECRET_KEY || "" });
 
     const participants = await Promise.all(activeGroup.participants.map(async (p) => {
+      const coupon = activeGroup.coupons.find(c => c.userId === p.userId);
       try {
         const clerkUser = await b2cClient.users.getUser(p.userId);
         return {
@@ -53,6 +60,7 @@ export async function GET(
           email: clerkUser.emailAddresses[0]?.emailAddress || "",
           phone: clerkUser.phoneNumbers[0]?.phoneNumber || "",
           joinedAt: p.joinedAt.toISOString(),
+          couponCode: coupon?.code || null,
         };
       } catch (err) {
         return {
@@ -62,6 +70,7 @@ export async function GET(
           email: "",
           phone: "",
           joinedAt: p.joinedAt.toISOString(),
+          couponCode: coupon?.code || null,
         };
       }
     }));
