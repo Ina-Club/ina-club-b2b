@@ -31,6 +31,12 @@ export function roleToLevel(role: Role): RoleLevel {
 ====================== */
 
 export async function requireAuth(minRole: RoleLevel) {
+  
+  // Role mechanism currently does not do anything.
+  // We don't allow users to create accounts for the b2b.
+  // Therefore, role validation is not required at the moment.
+  // However, I have left the Role logic and param passed to this function for future use. 
+
   try {
     const { userId } = await auth();
 
@@ -45,30 +51,13 @@ export async function requireAuth(minRole: RoleLevel) {
     if (!clerkUser) {
       return {
         user: null,
-        response: NextResponse.json({ error: "משתמש לא נמצא ב-Clerk" }, { status: 404 }),
-      };
-    }
-
-    // Since we don't have a User table anymore, we might need to store roles in Clerk metadata.
-    // For now, we'll assume BUSINESS role if they are signed into B2B.
-    // Or we can check if they have a B2B package.
-    const b2bPackage = await prisma.b2BPackage.findUnique({
-      where: { userId },
-    });
-
-    const userRole = (clerkUser.publicMetadata.role as Role) || Role.BUSINESS;
-
-    if (roleToLevel(userRole) < minRole) {
-      return {
-        user: null,
-        response: NextResponse.json({ error: "אין הרשאה" }, { status: 403 }),
+        response: NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 }),
       };
     }
 
     return { 
       user: { 
         id: userId, 
-        role: userRole, 
         email: clerkUser.emailAddresses[0]?.emailAddress,
         name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || clerkUser.username
       }, 

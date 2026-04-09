@@ -46,7 +46,6 @@ export async function POST(req: Request) {
 
     const userId = user!.id;
     
-    // Check package directly via userId
     const b2bPackage = await prisma.b2BPackage.findUnique({
       where: { userId },
     });

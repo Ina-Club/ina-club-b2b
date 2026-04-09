@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, RoleLevel } from "@/lib/auth";
-import { clerkClient } from "@clerk/nextjs/server";
+import { createClerkClient } from "@clerk/nextjs/server";
 
 export async function GET(
   req: Request,
@@ -39,11 +39,12 @@ export async function GET(
       return NextResponse.json({ error: "קבוצה לא נמצאה" }, { status: 404 });
     }
 
-    // Fetch user details from Clerk for each participant
-    const client = await clerkClient();
+    // Fetch user details from the B2C Clerk project
+    const b2cClient = createClerkClient({ secretKey: process.env.B2C_CLERK_SECRET_KEY || "" });
+
     const participants = await Promise.all(activeGroup.participants.map(async (p) => {
       try {
-        const clerkUser = await client.users.getUser(p.userId);
+        const clerkUser = await b2cClient.users.getUser(p.userId);
         return {
           id: p.id,
           name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || clerkUser.username || "משתמש",

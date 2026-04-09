@@ -53,4 +53,3 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "שגיאה בשליפת הקבוצות" }, { status: 500 });
   }
 }
-
