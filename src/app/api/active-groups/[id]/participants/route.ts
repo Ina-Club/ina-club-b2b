@@ -38,6 +38,14 @@ export async function GET(
             userId: true,
             code: true,
           }
+        },
+        tokens: {
+          select: {
+            id: true,
+            userId: true,
+            status: true,
+            consumedAt: true
+          }
         }
       },
     });
@@ -75,8 +83,39 @@ export async function GET(
       }
     }));
 
+    const activeParticipantIds = new Set(activeGroup.participants.map(p => p.userId));
+    
+    // Users who have a consumed token but are not active participants
+    const exitedTokens = activeGroup.tokens.filter(
+      t => t.status === "CONSUMED" && !activeParticipantIds.has(t.userId)
+    );
+
+    const exitedUsers = await Promise.all(exitedTokens.map(async (t) => {
+      try {
+        const clerkUser = await b2cClient.users.getUser(t.userId);
+        return {
+          id: `exited-${t.id}`,
+          userId: t.userId,
+          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "משתמש",
+          email: clerkUser.emailAddresses[0]?.emailAddress || "",
+          phone: clerkUser.phoneNumbers[0]?.phoneNumber || "",
+          joinedAt: t.consumedAt?.toISOString() || "",
+        };
+      } catch (err) {
+        return {
+          id: `exited-${t.id}`,
+          userId: t.userId,
+          name: "משתמש לא ידוע",
+          email: "",
+          phone: "",
+          joinedAt: t.consumedAt?.toISOString() || "",
+        };
+      }
+    }));
+
     return NextResponse.json({
       participants,
+      exitedUsers,
       groupInfo: {
         id: activeGroup.id,
         title: activeGroup.title,

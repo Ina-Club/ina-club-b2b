@@ -100,6 +100,7 @@ export default function ParticipantsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [noShowIds, setNoShowIds] = useState<Set<string>>(new Set());
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
+  const [exitedUsers, setExitedUsers] = useState<Participant[]>([]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -124,6 +125,7 @@ export default function ParticipantsPage() {
 
       const data = await res.json();
       setParticipants(data.participants || []);
+      setExitedUsers(data.exitedUsers || []);
       setGroupInfo(data.groupInfo || null);
     } catch (err: any) {
       setError(err.message || "שגיאה בטעינת הנתונים");
@@ -350,6 +352,52 @@ export default function ParticipantsPage() {
           </TableContainer>
         )}
       </Container>
+
+        <Container maxWidth="lg" sx={{ pt: 0, pb: 4, px: { xs: 0, sm: 3 } }}>
+          <Card>
+            <CardContent>
+              <Typography variant="h1" gutterBottom>
+                משתתפים שעזבו ושילמו קנס ({exitedUsers.length})
+              </Typography>
+              {exitedUsers.length === 0 ? (
+                <Typography variant="body1" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
+                  אין משתתפים שעזבו את הקבוצה.
+                </Typography>
+              ) : (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>שם מלא</TableCell>
+                        <TableCell>אימייל</TableCell>
+                        <TableCell>טלפון</TableCell>
+                        <TableCell>תאריך עזיבה</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {exitedUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell>{user.name}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.phone || "לא צוין"}</TableCell>
+                          <TableCell>
+                            {user.joinedAt ? new Date(user.joinedAt).toLocaleDateString("he-IL", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }) : "לא ידוע"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </CardContent>
+          </Card>
+        </Container>
 
       <Dialog
         open={resolveDialogOpen}
