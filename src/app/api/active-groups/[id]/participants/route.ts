@@ -24,6 +24,7 @@ export async function GET(
         id: true,
         title: true,
         description: true,
+        status: true,
         participants: {
           select: {
             id: true,
@@ -47,7 +48,8 @@ export async function GET(
         const clerkUser = await b2cClient.users.getUser(p.userId);
         return {
           id: p.id,
-          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || clerkUser.username || "משתמש",
+          userId: p.userId,
+          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "משתמש",
           email: clerkUser.emailAddresses[0]?.emailAddress || "",
           phone: clerkUser.phoneNumbers[0]?.phoneNumber || "",
           joinedAt: p.joinedAt.toISOString(),
@@ -55,6 +57,7 @@ export async function GET(
       } catch (err) {
         return {
           id: p.id,
+          userId: p.userId,
           name: "משתמש לא ידוע",
           email: "",
           phone: "",
@@ -70,6 +73,7 @@ export async function GET(
         title: activeGroup.title,
         description: activeGroup.description,
         participantsCount: participants.length,
+        status: activeGroup.status,
       },
     });
   } catch (e) {

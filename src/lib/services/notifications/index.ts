@@ -1,4 +1,4 @@
-import { clerkClient } from '@clerk/nextjs/server';
+import { createClerkClient } from '@clerk/nextjs/server';
 import { INotificationStrategy, NotificationContext } from './types';
 import { EmailNotificationStrategy } from './emailStrategy';
 
@@ -20,7 +20,7 @@ export class NotificationService {
 
     let usersMap = new Map<string, { email?: string; phone?: string }>();
     try {
-      const client = await clerkClient();
+      const client = createClerkClient({ secretKey: process.env.B2C_CLERK_SECRET_KEY || "" });
       for (let i = 0; i < userIds.length; i += 50) {
         // Sending requests in batches of 50 to avoid rate limits
         const chunk = userIds.slice(i, i + 50);
