@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, RoleLevel } from "@/lib/auth";
 
-import { GroupStatus } from "@prisma/client";
-
 export async function GET(
     req: Request,
     context: { params: Promise<{ id: string }> }
