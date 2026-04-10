@@ -10,7 +10,7 @@ import { CLERK_APPEARANCE_CONFIG, CLERK_LOCALIZATION_CONFIG } from "@/lib/clerk-
 export const metadata: Metadata = {
   title: "Ina Club B2B - פאנל ניהול עסקי",
   description: "פאנל ניהול לקבוצות פעילות",
-  icons: { icon: "/InaClubLogo.png" },
+  icons: { icon: "/InaClubAppLogo.png" },
 };
 
 export default function RootLayout({
