@@ -1,6 +1,6 @@
 "use client";
 
-import { AppBar, Toolbar, Box, Tabs, Tab, Button } from "@mui/material";
+import { AppBar, Toolbar, Tabs, Tab, Button } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useCallback } from "react";

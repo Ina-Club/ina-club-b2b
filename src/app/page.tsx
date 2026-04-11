@@ -15,6 +15,7 @@ import { Business, People, Analytics, Security } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PricingSection from "@/components/pricing/pricing-section";
+import ContactSection from "@/components/contact/contact";
 
 // שלבים של "איך זה עובד"
 const steps = [
@@ -514,6 +515,9 @@ export default function HomePage() {
 
       {/* ✅ Pricing Section */}
       <PricingSection />
+
+      {/* ✅ Contact Section */}
+      <ContactSection />
     </>
   );
 }
