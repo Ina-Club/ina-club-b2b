@@ -14,6 +14,9 @@ export default async function Page() {
       }}
     >
       <SignIn
+        forceRedirectUrl="/dashboard"
+        path="/sign-in"
+        routing="path"
         appearance={{
           variables: {
             colorPrimary: "#1a2a5a",
