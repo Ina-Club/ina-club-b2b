@@ -9,7 +9,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   Table,
   TableBody,
   TableCell,
@@ -48,19 +47,10 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true);
-
-      const [groupsRes, packageRes] = await Promise.all([
-        fetch("/api/active-groups/my-groups", { credentials: "include" }),
+      const [packageRes, groupsRes] = await Promise.all([
         fetch("/api/user/b2b-package", { credentials: "include" }),
+        fetch("/api/active-groups/my-groups", { credentials: "include" }),
       ]);
-
-      if (!groupsRes.ok) {
-        throw new Error("שגיאה בטעינת הקבוצות");
-      }
-
-      const groupsData = await groupsRes.json();
-      setActiveGroups(groupsData.activeGroups || []);
 
       if (packageRes.ok) {
         const packageData = await packageRes.json();
@@ -69,6 +59,13 @@ export default function DashboardPage() {
         router.push("/packages");
         return;
       }
+
+      if (!groupsRes.ok) {
+        throw new Error("שגיאה בטעינת הקבוצות");
+      }
+      const groupsData = await groupsRes.json();
+      setActiveGroups(groupsData.activeGroups || []);
+
     } catch (err: any) {
       setError(err.message || "שגיאה בטעינת הנתונים");
     } finally {
@@ -76,7 +73,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (!isLoaded || loading) {
+  if (!isLoaded || loading || !b2bPackage) {
     return (
       <DashboardLayout>
         <Box
