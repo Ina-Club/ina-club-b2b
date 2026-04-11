@@ -13,6 +13,7 @@ const SCROLL_SECTIONS = [
   { id: "contact", label: "צור קשר" },
 ];
 
+// TODO: Remove from logged in users
 export default function Header() {
   const [currentTab, setCurrentTab] = useState(0);
   const router = useRouter();
