@@ -25,20 +25,8 @@ import {
 import { Add, Visibility, Edit } from "@mui/icons-material";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
 import Link from "next/link";
-
-interface ActiveGroup {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  category: string;
-  basePrice: number;
-  groupPrice: number;
-  deadline: string;
-  participantsCount: number;
-  minParticipants?: number;
-  maxParticipants?: number;
-}
+import { ActiveGroup } from "@/lib/types/group";
+import { statusToLabelAndColorMap } from "@/lib/utils/group";
 
 export default function DashboardPage() {
   const { isLoaded, isSignedIn } = useUser();
@@ -85,36 +73,6 @@ export default function DashboardPage() {
       setError(err.message || "שגיאה בטעינת הנתונים");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "OPEN":
-        return "success";
-      case "CLOSED":
-        return "default";
-      case "CANCELED":
-        return "error";
-      case "EXPIRED":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "OPEN":
-        return "פתוח";
-      case "CLOSED":
-        return "סגור";
-      case "CANCELED":
-        return "בוטל";
-      case "EXPIRED":
-        return "פג תוקף";
-      default:
-        return status;
     }
   };
 
@@ -219,8 +177,8 @@ export default function DashboardPage() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={getStatusLabel(group.status)}
-                        color={getStatusColor(group.status) as any}
+                        label={statusToLabelAndColorMap[group.status].label}
+                        color={statusToLabelAndColorMap[group.status].color}
                         size="small"
                       />
                     </TableCell>

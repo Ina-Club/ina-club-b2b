@@ -28,10 +28,9 @@ import {
   DialogActions
 } from "@mui/material";
 import { ArrowBack, CheckCircle, Lock } from "@mui/icons-material";
-import Header from "@/components/header/header";
-import Footer from "@/components/footer/footer";
 import Link from "next/link";
 import { GroupStatus } from "@/lib/types/status";
+import { statusToLabelAndColorMap } from "@/lib/utils/group";
 
 interface Participant {
   id: string;
@@ -50,41 +49,6 @@ interface GroupInfo {
   participantsCount: number;
   status: GroupStatus;
 }
-
-// TODO: move to monorepo!!!
-const statusToLabelAndColorMap: Record<GroupStatus,
-  { label: string,
-    color: "info" | "success" | "default" | "error" | "warning"
-  }> = {
-  OPEN: {
-    label: "פתוחה (לא הופעלה)",
-    color: "info"
-  },
-  ACTIVATED: {
-    label: "פעילה",
-    color: "warning"
-  },
-  RESOLVED: {
-    label: "סגורה (חויבה)",
-    color: "success"
-  },
-  CANCELED: {
-    label: "בוטלה",
-    color: "error"
-  },
-  EXPIRED: {
-    label: "פג תוקף",
-    color: "error"
-  },
-  PENDING: {
-    label: "ממתינה",
-    color: "warning"
-  },
-  PREVIEW: {
-    label: "תצוגה מקדימה",
-    color: "info"
-  },
-};
 
 export default function ParticipantsPage() {
   const { isSignedIn, isLoaded } = useUser();
