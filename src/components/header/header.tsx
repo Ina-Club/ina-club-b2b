@@ -8,7 +8,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 const SCROLL_SECTIONS = [
-  { id: "why-us", label: "למה לבחור בנו?" },
+  { id: "how-does-it-work", label: "איך זה עובד?" },
   { id: "pricing", label: "תוכניות ותמחור" },
   { id: "contact", label: "צור קשר" },
 ];
