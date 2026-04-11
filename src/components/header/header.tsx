@@ -1,10 +1,11 @@
 "use client";
 
-import { AppBar, Toolbar, Box, Tabs, Tab, Button, Dialog } from "@mui/material";
+import { AppBar, Toolbar, Box, Tabs, Tab, Button } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useCallback } from "react";
-import { SignedIn, SignedOut, UserButton, SignIn } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 const SCROLL_SECTIONS = [
   { id: "why-us", label: "למה לבחור בנו?" },
@@ -14,7 +15,7 @@ const SCROLL_SECTIONS = [
 
 export default function Header() {
   const [currentTab, setCurrentTab] = useState(0);
-  const [openAuth, setOpenAuth] = useState(false);
+  const router = useRouter();
 
   const handleTabClick = useCallback((index: number, id: string) => {
     setCurrentTab(index);
@@ -62,9 +63,7 @@ export default function Header() {
           <SignedOut>
             <Button
               variant="contained"
-              onClick={() => {
-                setOpenAuth(true);
-              }}
+              onClick={() => { router.push("/sign-in"); }}
               sx={authContained}
             >
               התחבר
@@ -76,42 +75,11 @@ export default function Header() {
           </SignedIn>
         </Toolbar>
       </AppBar>
-
-      {/* ===== AUTH DIALOG ===== */}
-      <Dialog
-        open={openAuth}
-        onClose={() => setOpenAuth(false)}
-        maxWidth="xs"
-        PaperProps={{
-          sx: {
-            background: "transparent",
-            boxShadow: "none",
-          },
-        }}
-      >
-        <Box>
-          <SignIn
-            appearance={clerkAppearance}
-            routing="virtual"
-          />
-        </Box>
-      </Dialog>
     </>
   );
 }
 
 /* ===== STYLES ===== */
-
-const authOutlined = {
-  color: "#1a2a5a",
-  borderColor: "#1a2a5a",
-  borderRadius: "10px",
-  fontWeight: 600,
-  "&:hover": {
-    backgroundColor: "#1a2a5a",
-    color: "#fff",
-  },
-};
 
 const authContained = {
   backgroundColor: "#1a2a5a",
@@ -119,67 +87,5 @@ const authContained = {
   fontWeight: 600,
   "&:hover": {
     backgroundColor: "#243a7a",
-  },
-};
-
-const clerkAppearance = {
-  variables: {
-    colorPrimary: "#1a2a5a",
-    borderRadius: "10px",
-    fontFamily: '"Inter", sans-serif',
-  },
-  elements: {
-    footerAction: { display: "none" },
-    card: {
-      direction: "rtl",
-      textAlign: "right",
-      backgroundColor: "#fff",
-      borderRadius: "12px",
-      boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-    },
-    headerTitle: {
-      textAlign: "right",
-      color: "#1a2a5a",
-      fontWeight: "700",
-    },
-    headerSubtitle: {
-      textAlign: "right",
-      color: "#6b7280",
-    },
-    formFieldInput: {
-      direction: "rtl",
-      textAlign: "right",
-      borderRadius: "8px",
-      border: "1px solid #d1d5db",
-      "&:focus": {
-        borderColor: "#1a2a5a",
-        boxShadow: "0 0 0 2px rgba(26,42,90,0.15)",
-      },
-    },
-    formFieldLabel: {
-      textAlign: "right",
-      fontWeight: 500,
-      color: "#374151",
-    },
-    formButtonPrimary: {
-      backgroundColor: "#1a2a5a",
-      fontWeight: 600,
-      "&:hover": {
-        backgroundColor: "#243a7a",
-      },
-    },
-    socialButtonsBlockButton: {
-      borderRadius: "8px",
-      border: "1px solid #d1d5db",
-    },
-    footerPageLink: {
-      color: "#1a2a5a",
-      "&:hover": {
-        textDecoration: "underline",
-      },
-    },
-    spinner: {
-      color: "#1a2a5a",
-    },
   },
 };
