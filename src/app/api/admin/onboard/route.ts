@@ -36,6 +36,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Package already exists for this email" }, { status: 400 });
     }
 
+    // Send Clerk invitation *before* modifying DB to prevent orphans on failure
+    const invitation = await clerk.invitations.createInvitation({
+      emailAddress: email,
+      ignoreExisting: true,
+      redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`,
+    });
+
     const b2bPackage = await prisma.b2BPackage.create({
       data: {
         email,
@@ -46,20 +53,16 @@ export async function POST(req: Request) {
       },
     });
 
-    const invitation = await clerk.invitations.createInvitation({
-      emailAddress: email,
-      redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`,
-    });
-
     return NextResponse.json({ 
       success: true, 
       b2bPackage,
       invitationId: invitation.id 
     }, { status: 201 });
   } catch (error: any) {
-    console.error("Error creating package and sending invitation:", error);
+    console.error("Error creating package and sending invitation:", error.errors || error);
+    
     return NextResponse.json(
-      { error: "Error onboarding business", details: error.message },
+      { error: "Error onboarding business"},
       { status: 500 }
     );
   }

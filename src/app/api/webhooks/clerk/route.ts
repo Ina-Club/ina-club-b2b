@@ -4,6 +4,7 @@ import { WebhookEvent } from '@clerk/nextjs/server';
 import { handleUserCreated } from '@/lib/services/webhook';
 import { NextResponse } from 'next/server';
 
+// TODO: This should be tested in production, for now we assume it works.
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
