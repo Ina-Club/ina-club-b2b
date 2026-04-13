@@ -17,7 +17,9 @@ export async function handleB2BUserCreated(eventData: any) {
       throw new Error(`No B2BInvitation found for the registered email: ${email}`);
     }
   }
-  throw new Error(`No email found for the registered user: ${id}`);
+  else {
+    throw new Error(`No email found for the registered user: ${id}`);
+  }
 }
 
 async function commitB2BUserCreation(id: string, invitation: B2BInvitation) {
