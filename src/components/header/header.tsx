@@ -64,6 +64,7 @@ export default function Header() {
           )}
 
           {/* Auth buttons */}
+          {/* TODO: Remove the option to change/remove/add email address */}
           <SignedOut>
             <Button
               variant="contained"
