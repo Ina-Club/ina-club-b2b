@@ -33,7 +33,7 @@ export async function GET(req: Request) {
       0
     );
     const openGroups = activeGroups.filter((g) => g.status === GroupStatus.OPEN).length;
-    const closedGroups = activeGroups.filter((g) => g.status === GroupStatus.ACTIVATED).length;
+    const activatedGroups = activeGroups.filter((g) => g.status === GroupStatus.ACTIVATED).length;
 
     // Group by category
     const categoryStats = activeGroups.reduce((acc, group) => {
@@ -73,7 +73,7 @@ export async function GET(req: Request) {
         totalParticipants,
         totalRevenue,
         openGroups,
-        closedGroups,
+        activatedGroups,
       },
       categoryStats: Object.values(categoryStats),
       monthlyRevenue: Object.entries(monthlyRevenue).map(([month, revenue]) => ({
