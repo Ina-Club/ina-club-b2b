@@ -56,7 +56,7 @@ export default function DashboardPage() {
         const packageData = await packageRes.json();
         setB2bPackage(packageData.package);
       } else if (packageRes.status === 404) {
-        router.push("/packages");
+        router.push("/unauthorized");
         return;
       }
 

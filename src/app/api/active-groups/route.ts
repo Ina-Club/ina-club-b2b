@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, RoleLevel } from "@/lib/auth";
-import { GroupStatus } from "@prisma/client";
+import { requireAuth } from "@/lib/auth";
+import { RoleLevel } from "@/lib/types/role";
+import { GroupStatus } from "@/lib/types/status";
 
 export async function GET(req: Request) {
   try {

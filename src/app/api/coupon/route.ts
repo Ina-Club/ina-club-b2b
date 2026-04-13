@@ -1,4 +1,5 @@
-import { requireAuth, RoleLevel } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { RoleLevel } from "@/lib/types/role";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { createGroupCoupon } from "@/lib/services/coupon";

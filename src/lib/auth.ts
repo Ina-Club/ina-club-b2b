@@ -1,30 +1,24 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { Role } from "@prisma/client";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { RoleLevel } from "./types/role";
 
 /* ======================
    Role levels
 ====================== */
 
-export enum RoleLevel {
-  USER = 0,
-  BUSINESS = 1,
-  ADMIN = 2,
-}
-
-export function roleToLevel(role: Role): RoleLevel {
-  switch (role) {
-    case Role.USER:
-      return RoleLevel.USER;
-    case Role.BUSINESS:
-      return RoleLevel.BUSINESS
-    case Role.ADMIN:
-      return RoleLevel.ADMIN;
-    default:
-      throw new Error(`Unhandled role: ${role}`);
-  }
-}
+// export function roleToLevel(role: Role): RoleLevel {
+//   switch (role) {
+//     case Role.USER:
+//       return RoleLevel.USER;
+//     case Role.BUSINESS:
+//       return RoleLevel.BUSINESS
+//     case Role.ADMIN:
+//       return RoleLevel.ADMIN;
+//     default:
+//       throw new Error(`Unhandled role: ${role}`);
+//   }
+// }
 
 /* ======================
    Require auth + role
@@ -108,7 +102,7 @@ export async function getCurrentUser() {
       email: clerkUser.emailAddresses[0]?.emailAddress,
       name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || clerkUser.username,
       profilePicture: clerkUser.imageUrl,
-      role: (clerkUser.publicMetadata.role as Role) || Role.BUSINESS,
+      role: clerkUser.publicMetadata.role || RoleLevel.BUSINESS,
       b2bPackage,
       company,
     };

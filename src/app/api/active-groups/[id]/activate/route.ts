@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, RoleLevel } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { RoleLevel } from "@/lib/types/role";
 import { createGroupCoupon } from "@/lib/services/coupon";
 import { notificationService } from "@/lib/services/notifications";
 // TODO: Move to monorepo!!! 

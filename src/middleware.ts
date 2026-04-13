@@ -4,11 +4,13 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/api/package-inquiry",
+  "/unauthorized",
 
   // APIs ציבוריים
   "/api/companies",
   "/api/testimonials",
   "/api/users/exists",
+  "/api/webhooks(.*)",
 ]);
 
 const isProtectedApiRoute = createRouteMatcher([
