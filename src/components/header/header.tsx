@@ -1,6 +1,6 @@
 "use client";
 
-import { AppBar, Toolbar, Tabs, Tab, Button } from "@mui/material";
+import { AppBar, Toolbar, Tabs, Tab, Button, useMediaQuery } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useCallback } from "react";
@@ -16,6 +16,7 @@ const SCROLL_SECTIONS = [
 export default function Header() {
   const [currentTab, setCurrentTab] = useState(0);
   const { isSignedIn } = useUser();
+  const isMobile = useMediaQuery("(max-width: 600px)");
   const router = useRouter();
 
   const handleTabClick = useCallback((index: number, id: string) => {
@@ -45,7 +46,7 @@ export default function Header() {
           </Link>
 
           {/* Tabs */}
-          {!isSignedIn && (
+          {!isSignedIn && !isMobile && (
             <Tabs value={currentTab}>
               {SCROLL_SECTIONS.map((item, i) => (
                 <Tab
