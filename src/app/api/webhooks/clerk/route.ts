@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { handleUserCreated } from '@/lib/services/webhook';
+import { handleB2BUserCreated } from '@/lib/services/webhook';
 import { NextResponse } from 'next/server';
 
 // TODO: This should be tested in production, for now we assume it works.
@@ -42,8 +42,13 @@ export async function POST(req: Request) {
   const eventType = event.type;
 
   if (eventType === 'user.created') {
-    await handleUserCreated(event.data);
+    try {
+      await handleB2BUserCreated(event.data);
+    } catch (error) {
+      console.error('Error handling user created webhook:', error);
+      return NextResponse.json({ success: false, message: 'Error handling user created webhook' }, { status: 500 });
+    }
   }
 
-  return NextResponse.json({ success: true, message: 'Webhook received' }, { status: 200 });
+  return NextResponse.json({ success: true }, { status: 200 });
 }

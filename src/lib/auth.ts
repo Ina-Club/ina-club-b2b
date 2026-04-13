@@ -111,13 +111,3 @@ export async function getCurrentUser() {
     return null;
   }
 }
-
-/* ======================
-   Utility
-====================== */
-
-export async function getUserIdByEmail(email: string) {
-  // This is tricky without a local User table. 
-  // We'd need to search Clerk users.
-  return null;
-}

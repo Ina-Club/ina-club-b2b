@@ -4,6 +4,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { requireAuth } from "@/lib/auth";
 import { RoleLevel } from "@/lib/types/role";
 import { PackageType } from "@prisma/client";
+import { getUserByEmail } from "@/lib/services/user";
 
 export async function POST(req: Request) {
   try {
@@ -22,18 +23,21 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { email, packageType, maxGroups, price, endDate } = body;
+    const { email, packageType, maxGroups, price, endDate, companyTitle, companyAddress, companyCity } = body;
 
-    if (!email || !packageType || maxGroups === undefined || price === undefined) {
+    if (!email || !packageType || maxGroups === undefined || price === undefined || !companyTitle) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const existingPackage = await prisma.b2BPackage.findUnique({
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) return NextResponse.json({ error: "User already exists with this email" }, { status: 400 });
+    
+    const existingInvitation = await prisma.b2BInvitation.findUnique({
       where: { email },
     });
 
-    if (existingPackage) {
-      return NextResponse.json({ error: "Package already exists for this email" }, { status: 400 });
+    if (existingInvitation) {
+      return NextResponse.json({ error: "Invitation already exists for this email" }, { status: 400 });
     }
 
     // Send Clerk invitation *before* modifying DB to prevent orphans on failure
@@ -43,19 +47,22 @@ export async function POST(req: Request) {
       redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`,
     });
 
-    const b2bPackage = await prisma.b2BPackage.create({
+    const b2bInvitation = await prisma.b2BInvitation.create({
       data: {
         email,
         packageType: packageType as PackageType,
         maxGroups: parseInt(maxGroups, 10),
         price: parseFloat(price),
         endDate: endDate ? new Date(endDate) : null,
+        companyTitle,
+        companyAddress: companyAddress || null,
+        companyCity: companyCity || null,
       },
     });
 
     return NextResponse.json({ 
       success: true, 
-      b2bPackage,
+      b2bInvitation,
       invitationId: invitation.id 
     }, { status: 201 });
   } catch (error: any) {
