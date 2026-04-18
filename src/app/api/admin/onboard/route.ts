@@ -19,7 +19,8 @@ export async function POST(req: Request) {
     const serverUser = await clerk.users.getUser(user.id);
     // This should be added manually in the clerk dashboard
     if (serverUser.publicMetadata.role !== RoleLevel.ADMIN) {
-      return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
+      // Return 404 to prevent user from knowing that the route exists
+      return NextResponse.json({ error: "Route not found" }, { status: 404 });
     }
 
     const body = await req.json();
