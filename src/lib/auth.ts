@@ -7,6 +7,7 @@ import { RoleLevel } from "./types/role";
    Role levels
 ====================== */
 
+// Not used at the moment, leaving code for future use.
 // export function roleToLevel(role: Role): RoleLevel {
 //   switch (role) {
 //     case Role.USER:
