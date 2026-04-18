@@ -460,57 +460,65 @@ export default function HomePage() {
             היומיומי
           </Typography>
         </Box>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "repeat(2,1fr)",
-              md: "repeat(3,1fr)",
-            },
-            gap: 3,
-          }}
-        >
-          {loading ? (
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            {/* TODO: add skeletons */}
             <Typography>טוען...</Typography>
-          ) : companies.length > 0 ? (
-            companies.map((company) => (
-              <Box key={company.id || company.name}>
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    boxShadow: 2,
-                    height: "100%",
-                    bgcolor: "white",
-                  }}
-                >
-                  <CardContent sx={{ textAlign: "center", py: 4 }}>
-                    {company.logo?.url && (
-                      <Box
-                        component="img"
-                        src={company.logo.url}
-                        alt={company.title}
-                        sx={{
-                          width: 64,
-                          height: 64,
-                          borderRadius: 2,
-                          mx: "auto",
-                          mb: 2,
-                          objectFit: "contain",
-                        }}
-                      />
-                    )}
-                    <Typography variant="h6" sx={{ color: "#1a2a5a", mb: 1 }}>
-                      {company.title}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Box>
-            ))
+          </Box>
+        ) :
+          companies.length > 0 ? (
+            <Box
+              sx={{
+                display: "grid",
+                justifyContent: "center",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2,1fr)",
+                  md: "repeat(3,1fr)",
+                },
+                gap: 3,
+              }}
+            >
+              {companies.map((company) => (
+                <Box key={company.id || company.name}>
+                  <Card
+                    sx={{
+                      borderRadius: 3,
+                      boxShadow: 2,
+                      height: "100%",
+                      bgcolor: "white",
+                    }}
+                  >
+                    <CardContent sx={{ textAlign: "center", py: 4 }}>
+                      {company.logo?.url && (
+                        <Box
+                          component="img"
+                          src={company.logo.url}
+                          alt={company.title}
+                          sx={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: 2,
+                            mx: "auto",
+                            mb: 2,
+                            objectFit: "contain",
+                          }}
+                        />
+                      )}
+                      <Typography variant="h6" sx={{ color: "#1a2a5a", mb: 1 }}>
+                        {company.title}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Box>
+              ))}
+            </Box>
           ) : (
-            <Typography>אין חברות להצגה</Typography>
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <Typography>אין חברות להצגה</Typography>
+            </Box>
           )}
-        </Box>
+
       </Container>
 
       {/* ✅ Pricing Section */}

@@ -3,12 +3,13 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
-  "/api/package-inquiry",
 
   // APIs ציבוריים
   "/api/companies",
+  "/api/package-inquiry",
   "/api/testimonials",
   "/api/users/exists",
+  "/api/webhooks(.*)",
 ]);
 
 const isProtectedApiRoute = createRouteMatcher([

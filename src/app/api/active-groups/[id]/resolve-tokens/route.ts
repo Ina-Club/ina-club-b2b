@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
-import { requireAuth, RoleLevel } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { RoleLevel } from "@/lib/types/role";
 import { PaymentTokenStatus, GroupStatus } from "@/lib/types/status";
 import { chargeParticipantToken, releaseParticipantToken } from "@/lib/services/activeGroup";
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { AppBar, Toolbar, Tabs, Tab, Button } from "@mui/material";
+import { AppBar, Toolbar, Tabs, Tab, Button, useMediaQuery } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useCallback } from "react";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 const SCROLL_SECTIONS = [
@@ -13,9 +13,10 @@ const SCROLL_SECTIONS = [
   { id: "contact", label: "צור קשר" },
 ];
 
-// TODO: Remove from logged in users
 export default function Header() {
   const [currentTab, setCurrentTab] = useState(0);
+  const { isSignedIn } = useUser();
+  const isMobile = useMediaQuery("(max-width: 600px)");
   const router = useRouter();
 
   const handleTabClick = useCallback((index: number, id: string) => {
@@ -45,22 +46,25 @@ export default function Header() {
           </Link>
 
           {/* Tabs */}
-          <Tabs value={currentTab}>
-            {SCROLL_SECTIONS.map((item, i) => (
-              <Tab
-                key={item.id}
-                label={item.label}
-                onClick={() => handleTabClick(i, item.id)}
-                sx={{
-                  fontWeight: 600,
-                  color: "#1a2a5a",
-                  textTransform: "none",
-                }}
-              />
-            ))}
-          </Tabs>
+          {!isSignedIn && !isMobile && (
+            <Tabs value={currentTab}>
+              {SCROLL_SECTIONS.map((item, i) => (
+                <Tab
+                  key={item.id}
+                  label={item.label}
+                  onClick={() => handleTabClick(i, item.id)}
+                  sx={{
+                    fontWeight: 600,
+                    color: "#1a2a5a",
+                    textTransform: "none",
+                  }}
+                />
+              ))}
+            </Tabs>
+          )}
 
           {/* Auth buttons */}
+          {/* TODO: Remove the option to change/remove/add email address */}
           <SignedOut>
             <Button
               variant="contained"

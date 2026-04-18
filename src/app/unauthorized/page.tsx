@@ -1,9 +1,22 @@
 import { Box, Button, Typography, Container, Paper } from "@mui/material";
 import { Security, Logout } from "@mui/icons-material";
 import { SignOutButton } from "@clerk/nextjs";
-import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
-export default function UnauthorizedPage() {
+export default async function UnauthorizedPage() {
+    const { userId } = await auth();
+
+    if (userId) {
+        const hasPackage = await prisma.b2BPackage.findUnique({
+            where: { userId }
+        });
+
+        if (hasPackage) {
+            redirect("/dashboard");
+        }
+    }
     return (
         <Container maxWidth="sm" sx={{ py: 12 }}>
             <Paper
