@@ -4,13 +4,13 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { requireAuth } from "@/lib/auth";
 import { RoleLevel } from "@/lib/types/role";
 import { PackageType } from "@prisma/client";
-import { getUserByEmail } from "@/lib/services/user";
+import { getUserByEmail, inviteUser } from "@/lib/services/user";
 
 export async function POST(req: Request) {
   try {
     const { user, response } = await requireAuth(RoleLevel.ADMIN);
     if (response) return response;
-    
+
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -32,21 +32,11 @@ export async function POST(req: Request) {
 
     const existingUser = await getUserByEmail(email);
     if (existingUser) return NextResponse.json({ error: "User already exists with this email" }, { status: 400 });
-    
+
     const existingInvitation = await prisma.b2BInvitation.findUnique({
       where: { email },
     });
-
-    if (existingInvitation) {
-      return NextResponse.json({ error: "Invitation already exists for this email" }, { status: 400 });
-    }
-
-    // Send Clerk invitation *before* modifying DB to prevent orphans on failure
-    const invitation = await clerk.invitations.createInvitation({
-      emailAddress: email,
-      ignoreExisting: true,
-      redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`,
-    });
+    if (existingInvitation) return NextResponse.json({ error: "Invitation already exists for this email" }, { status: 400 });
 
     const b2bInvitation = await prisma.b2BInvitation.create({
       data: {
@@ -61,16 +51,27 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    let invitation;
+    try {
+      invitation = await inviteUser(email);
+    } catch (error) {
+      console.error("Error inviting user:", error);
+      await prisma.b2BInvitation.deleteMany({
+        where: { id: b2bInvitation.id },
+      });
+      return NextResponse.json({ error: "Error inviting user" }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
       b2bInvitation,
-      invitationId: invitation.id 
+      invitationId: invitation.id
     }, { status: 201 });
   } catch (error: any) {
     console.error("Error creating package and sending invitation:", error.errors || error);
-    
+
     return NextResponse.json(
-      { error: "Error onboarding business"},
+      { error: "Error onboarding business" },
       { status: 500 }
     );
   }
