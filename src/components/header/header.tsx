@@ -4,8 +4,9 @@ import { AppBar, Toolbar, Tabs, Tab, Button, useMediaQuery } from "@mui/material
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useCallback } from "react";
-import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import LogoutDialog from "./logout-dialog";
 
 const SCROLL_SECTIONS = [
   { id: "how-does-it-work", label: "איך זה עובד?" },
@@ -15,7 +16,9 @@ const SCROLL_SECTIONS = [
 
 export default function Header() {
   const [currentTab, setCurrentTab] = useState(0);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const { isSignedIn } = useUser();
+  const { signOut } = useClerk();
   const isMobile = useMediaQuery("(max-width: 600px)");
   const router = useRouter();
 
@@ -23,6 +26,16 @@ export default function Header() {
     setCurrentTab(index);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   }, []);
+
+  const handleLogout = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const performLogout = async () => {
+    await signOut();
+    setLogoutDialogOpen(false);
+    router.push("/");
+  };
 
   return (
     <>
@@ -64,7 +77,6 @@ export default function Header() {
           )}
 
           {/* Auth buttons */}
-          {/* TODO: Remove the option to change/remove/add email address */}
           <SignedOut>
             <Button
               variant="contained"
@@ -76,10 +88,21 @@ export default function Header() {
           </SignedOut>
 
           <SignedIn>
-            <UserButton />
+             <Button
+              variant="outlined"
+              onClick={() => { handleLogout(); }}
+            >
+              התנתק
+            </Button>
           </SignedIn>
         </Toolbar>
       </AppBar>
+
+      <LogoutDialog
+        open={logoutDialogOpen}
+        onClose={() => setLogoutDialogOpen(false)}
+        handleLogout={performLogout}
+      />
     </>
   );
 }
