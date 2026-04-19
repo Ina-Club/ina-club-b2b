@@ -1,20 +1,9 @@
 import { NextResponse } from "next/server";
-
-// Try to import Resend if available
-let Resend: any = null;
-let resend: any = null;
-try {
-  const resendModule = require("resend");
-  Resend = resendModule.Resend;
-  if (process.env.RESEND_API_KEY) {
-    resend = new Resend(process.env.RESEND_API_KEY);
-  }
-} catch (e) {
-  console.warn("Resend package not installed. Email functionality will be limited.");
-}
+import { Resend } from "resend";
 
 export async function POST(req: Request) {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const body = await req.json();
     const {
       planId,
@@ -107,4 +96,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
