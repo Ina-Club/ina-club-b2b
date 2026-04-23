@@ -38,7 +38,7 @@ export async function requireAuth(minRole: RoleLevel) {
     if (!userId) {
       return {
         user: null,
-        response: NextResponse.json({ error: "לא מורשה" }, { status: 401 }),
+        response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
       };
     }
 
