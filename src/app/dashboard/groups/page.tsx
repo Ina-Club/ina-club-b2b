@@ -20,6 +20,14 @@ import {
   Paper,
   Chip,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  OutlinedInput,
+  SelectChangeEvent,
 } from "@mui/material";
 import { Add, Visibility, Edit } from "@mui/icons-material";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
@@ -33,6 +41,7 @@ export default function GroupsPage() {
   const [activeGroups, setActiveGroups] = useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -43,6 +52,20 @@ export default function GroupsPage() {
 
     fetchGroups();
   }, [isLoaded, isSignedIn, router]);
+
+  const displayedGroups = activeGroups.filter(
+    (g) => selectedStatuses.length === 0 || selectedStatuses.includes(g.status)
+  );
+
+  const availableStatuses = Object.keys(statusToLabelAndColorMap);
+
+  const handleStatusChange = (event: SelectChangeEvent<typeof selectedStatuses>) => {
+    const {
+      target: { value },
+    } = event;
+    // This check is a type guard to ensure that the value is an array
+    setSelectedStatuses(typeof value === "string" ? value.split(",") : value);
+  };
 
   const fetchGroups = async () => {
     try {
@@ -86,18 +109,45 @@ export default function GroupsPage() {
           <Typography variant="h4" sx={{ fontWeight: "bold", color: "#1a2a5a" }}>
             הקבוצות שלי
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            component={Link}
-            href="/dashboard/create-group"
-            sx={{
-              backgroundColor: "#1a2a5a",
-              "&:hover": { backgroundColor: "#243a7a" },
-            }}
-          >
-            צור קבוצה חדשה
-          </Button>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <FormControl sx={{ minWidth: 200 }} size="small">
+              <InputLabel id="status-filter-label">סנן לפי סטטוס</InputLabel>
+              <Select
+                labelId="status-filter-label"
+                id="status-filter"
+                multiple
+                value={selectedStatuses}
+                onChange={handleStatusChange}
+                input={<OutlinedInput label="סנן לפי סטטוס" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip key={value} label={(statusToLabelAndColorMap as any)[value]?.label} size="small" />
+                    ))}
+                  </Box>
+                )}
+              >
+                {availableStatuses.map((status) => (
+                  <MenuItem key={status} value={status}>
+                    <Checkbox checked={selectedStatuses.indexOf(status) > -1} />
+                    <ListItemText primary={(statusToLabelAndColorMap as any)[status]?.label} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              component={Link}
+              href="/dashboard/create-group"
+              sx={{
+                backgroundColor: "#1a2a5a",
+                "&:hover": { backgroundColor: "#243a7a" },
+              }}
+            >
+              צור קבוצה חדשה
+            </Button>
+          </Box>
         </Box>
 
         {error && (
@@ -106,23 +156,15 @@ export default function GroupsPage() {
           </Alert>
         )}
 
-        {activeGroups.length === 0 ? (
+        {displayedGroups.length === 0 ? (
           <Card>
             <CardContent sx={{ textAlign: "center", py: 8 }}>
               <Typography variant="h6" gutterBottom>
-                אין קבוצות פעילות
+                אין קבוצות להצגה
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                התחל ליצור קבוצה פעילה חדשה
+                לא נמצאו קבוצות בסטטוסים המבוקשים
               </Typography>
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                component={Link}
-                href="/dashboard/create-group"
-              >
-                צור קבוצה חדשה
-              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -141,7 +183,7 @@ export default function GroupsPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {activeGroups.map((group) => (
+                {displayedGroups.map((group) => (
                   <TableRow key={group.id}>
                     <TableCell>{group.title}</TableCell>
                     <TableCell>{group.category}</TableCell>

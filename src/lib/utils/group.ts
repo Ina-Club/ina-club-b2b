@@ -6,7 +6,7 @@ export const statusToLabelAndColorMap: Record<GroupStatus,
     color: "info" | "success" | "default" | "error" | "warning"
   }> = {
   OPEN: {
-    label: "פתוחה (לא הופעלה)",
+    label: "פתוחה",
     color: "info"
   },
   ACTIVATED: {
@@ -14,7 +14,7 @@ export const statusToLabelAndColorMap: Record<GroupStatus,
     color: "warning"
   },
   RESOLVED: {
-    label: "סגורה (חויבה)",
+    label: "הושלמה",
     color: "success"
   },
   CANCELED: {

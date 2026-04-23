@@ -26,6 +26,7 @@ import DashboardLayout from "@/components/dashboard/dashboard-layout";
 import Link from "next/link";
 import { ActiveGroup } from "@/lib/types/group";
 import { statusToLabelAndColorMap } from "@/lib/utils/group";
+import { GroupStatus } from "@/lib/types/status";
 
 export default function DashboardPage() {
   const { isLoaded, isSignedIn } = useUser();
@@ -73,6 +74,10 @@ export default function DashboardPage() {
     }
   };
 
+  const runningGroups = activeGroups.filter(
+    (group) => [GroupStatus.OPEN, GroupStatus.ACTIVATED].includes(group.status)
+  );
+
   if (!isLoaded || loading || !b2bPackage) {
     return (
       <DashboardLayout>
@@ -112,7 +117,7 @@ export default function DashboardPage() {
                 החבילה שלך: {b2bPackage.packageType === "BASIC" ? "בסיסי" : b2bPackage.packageType === "PREMIUM" ? "פרימיום" : "ארגוני"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                קבוצות פעילות: {activeGroups.length} / {b2bPackage.maxGroups}
+                קבוצות פעילות: {runningGroups.length} / {b2bPackage.maxGroups}
               </Typography>
             </CardContent>
           </Card>
@@ -124,23 +129,15 @@ export default function DashboardPage() {
           </Alert>
         )}
 
-        {activeGroups.length === 0 ? (
+        {runningGroups.length === 0 ? (
           <Card>
             <CardContent sx={{ textAlign: "center", py: 8 }}>
               <Typography variant="h2" gutterBottom>
                 אין קבוצות פעילות
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                התחל ליצור קבוצה פעילה חדשה
-              </Typography>
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                component={Link}
-                href="/dashboard/create-group"
-              >
-                צור קבוצה חדשה
-              </Button>
+                צרו קבוצה חדשה כדי להתחיל
+                              </Typography>
             </CardContent>
           </Card>
         ) : (
@@ -159,7 +156,7 @@ export default function DashboardPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {activeGroups.map((group) => (
+                {runningGroups.map((group) => (
                   <TableRow key={group.id}>
                     <TableCell>{group.title}</TableCell>
                     <TableCell>{group.category}</TableCell>
