@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     const activeGroupsCount = await prisma.activeGroup.count({
       where: {
         createdById: userId,
-        status: { in: ["OPEN", "PENDING"] },
+        status: GroupStatus.OPEN,
       },
     });
 
