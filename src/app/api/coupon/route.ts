@@ -12,8 +12,12 @@ export async function POST(req: Request) {
     const { groupId } = await req.json();
     if (!groupId) return NextResponse.json({ error: "groupId is required" }, { status: 400 });
 
-    const group = await prisma.activeGroup.findUnique({ where: { id: groupId }, select: { id: true, deadline: true } });
+    const group = await prisma.activeGroup.findUnique({ where: { id: groupId } });
     if (!group) return NextResponse.json({ error: "Group not found!" }, { status: 404 });
+    if (group.createdById !== user.id) {
+      console.log(`User ${user.id} does not own group ${groupId}!`);
+      return NextResponse.json({ error: "Group not found!" }, { status: 404 });
+    }
 
     const participant = await prisma.activeGroupParticipant.findUnique({
       where: { userId_activeGroupId: { userId: user.id, activeGroupId: groupId } },
@@ -36,15 +40,26 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const { response } = await requireAuth(RoleLevel.BUSINESS);
+    const { user, response } = await requireAuth(RoleLevel.BUSINESS);
     if (response) return response;
 
     const { couponId } = await req.json();
+
     if (!couponId) return NextResponse.json({ error: "couponId is required" }, { status: 400 });
 
-    const coupon = await prisma.coupon.findUnique({ where: { id: couponId } });
+    const coupon = await prisma.coupon.findUnique({
+      where: { id: couponId },
+      select: {
+        activeGroup: { select: { createdById: true } },
+        userId: true
+      }
+    });
     if (!coupon) return NextResponse.json({ error: "Coupon not found!" }, { status: 404 });
-    // TODO: Add admin validation for deleting coupons
+
+    if (coupon.activeGroup.createdById !== user.id) {
+      console.log(`User ${user.id} does not own group ${couponId}!`);
+      return NextResponse.json({ error: "Group not found!" }, { status: 404 });
+    }
 
     await prisma.coupon.delete({ where: { id: couponId } });
     return NextResponse.json({ success: true });
