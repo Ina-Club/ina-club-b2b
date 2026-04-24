@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, RoleLevel } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { RoleLevel } from "@/lib/types/role";
+import { GroupStatus } from "@/lib/types/status";
 
 export async function GET(req: Request) {
   try {
@@ -30,8 +32,8 @@ export async function GET(req: Request) {
       (sum, group) => sum + group.groupPrice * group.participants.length,
       0
     );
-    const openGroups = activeGroups.filter((g) => g.status === "OPEN").length;
-    const closedGroups = activeGroups.filter((g) => g.status === "CLOSED").length;
+    const openGroups = activeGroups.filter((g) => g.status === GroupStatus.OPEN).length;
+    const activatedGroups = activeGroups.filter((g) => g.status === GroupStatus.ACTIVATED).length;
 
     // Group by category
     const categoryStats = activeGroups.reduce((acc, group) => {
@@ -71,7 +73,7 @@ export async function GET(req: Request) {
         totalParticipants,
         totalRevenue,
         openGroups,
-        closedGroups,
+        activatedGroups,
       },
       categoryStats: Object.values(categoryStats),
       monthlyRevenue: Object.entries(monthlyRevenue).map(([month, revenue]) => ({
@@ -87,4 +89,3 @@ export async function GET(req: Request) {
     );
   }
 }
-

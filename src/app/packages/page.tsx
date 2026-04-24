@@ -17,8 +17,6 @@ import {
   Alert,
 } from "@mui/material";
 import { Check } from "@mui/icons-material";
-import Header from "@/components/header/header";
-import Footer from "@/components/footer/footer";
 
 interface Package {
   type: "BASIC" | "PREMIUM" | "ENTERPRISE";

@@ -1,20 +1,9 @@
 import { NextResponse } from "next/server";
-
-// Try to import Resend if available
-let Resend: any = null;
-let resend: any = null;
-try {
-  const resendModule = require("resend");
-  Resend = resendModule.Resend;
-  if (process.env.RESEND_API_KEY) {
-    resend = new Resend(process.env.RESEND_API_KEY);
-  }
-} catch (e) {
-  console.warn("Resend package not installed. Email functionality will be limited.");
-}
+import { Resend } from "resend";
 
 export async function POST(req: Request) {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const body = await req.json();
     const {
       planId,
@@ -74,9 +63,11 @@ export async function POST(req: Request) {
     // Send email using Resend
     if (resend && process.env.RESEND_API_KEY) {
       try {
+        const receiverEmail = process.env.NODE_ENV === "development" ? process.env.RESEND_TEST_EMAIL : process.env.EMAIL_FROM;
+        if (!receiverEmail) throw new Error("Receiver email not configured");
         const { data, error } = await resend.emails.send({
           from: process.env.EMAIL_FROM || "Ina Club B2B <noreply@inaclub.com>",
-          to: "idan040202@gmail.com",
+          to: receiverEmail,
           subject: `בקשה חדשה לבחירת חבילה - ${planTitle}`,
           html: emailContent,
         });
@@ -107,4 +98,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

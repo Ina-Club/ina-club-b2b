@@ -9,7 +9,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   Table,
   TableBody,
   TableCell,
@@ -25,20 +24,9 @@ import {
 import { Add, Visibility, Edit } from "@mui/icons-material";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
 import Link from "next/link";
-
-interface ActiveGroup {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  category: string;
-  basePrice: number;
-  groupPrice: number;
-  deadline: string;
-  participantsCount: number;
-  minParticipants?: number;
-  maxParticipants?: number;
-}
+import { ActiveGroup } from "@/lib/types/group";
+import { statusToLabelAndColorMap } from "@/lib/utils/group";
+import { GroupStatus } from "@/lib/types/status";
 
 export default function DashboardPage() {
   const { isLoaded, isSignedIn } = useUser();
@@ -60,27 +48,25 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true);
-
-      const [groupsRes, packageRes] = await Promise.all([
-        fetch("/api/active-groups/my-groups", { credentials: "include" }),
+      const [packageRes, groupsRes] = await Promise.all([
         fetch("/api/user/b2b-package", { credentials: "include" }),
+        fetch("/api/active-groups/my-groups", { credentials: "include" }),
       ]);
-
-      if (!groupsRes.ok) {
-        throw new Error("שגיאה בטעינת הקבוצות");
-      }
-
-      const groupsData = await groupsRes.json();
-      setActiveGroups(groupsData.activeGroups || []);
 
       if (packageRes.ok) {
         const packageData = await packageRes.json();
         setB2bPackage(packageData.package);
       } else if (packageRes.status === 404) {
-        router.push("/packages");
+        router.push("/unauthorized");
         return;
       }
+
+      if (!groupsRes.ok) {
+        throw new Error("שגיאה בטעינת הקבוצות");
+      }
+      const groupsData = await groupsRes.json();
+      setActiveGroups(groupsData.activeGroups || []);
+
     } catch (err: any) {
       setError(err.message || "שגיאה בטעינת הנתונים");
     } finally {
@@ -88,37 +74,11 @@ export default function DashboardPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "OPEN":
-        return "success";
-      case "CLOSED":
-        return "default";
-      case "CANCELED":
-        return "error";
-      case "EXPIRED":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
+  const runningGroups = activeGroups.filter(
+    (group) => [GroupStatus.OPEN, GroupStatus.ACTIVATED].includes(group.status)
+  );
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "OPEN":
-        return "פתוח";
-      case "CLOSED":
-        return "סגור";
-      case "CANCELED":
-        return "בוטל";
-      case "EXPIRED":
-        return "פג תוקף";
-      default:
-        return status;
-    }
-  };
-
-  if (!isLoaded || loading) {
+  if (!isLoaded || loading || !b2bPackage) {
     return (
       <DashboardLayout>
         <Box
@@ -157,7 +117,7 @@ export default function DashboardPage() {
                 החבילה שלך: {b2bPackage.packageType === "BASIC" ? "בסיסי" : b2bPackage.packageType === "PREMIUM" ? "פרימיום" : "ארגוני"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                קבוצות פעילות: {activeGroups.length} / {b2bPackage.maxGroups}
+                קבוצות פעילות: {runningGroups.length} / {b2bPackage.maxGroups}
               </Typography>
             </CardContent>
           </Card>
@@ -169,23 +129,15 @@ export default function DashboardPage() {
           </Alert>
         )}
 
-        {activeGroups.length === 0 ? (
+        {runningGroups.length === 0 ? (
           <Card>
             <CardContent sx={{ textAlign: "center", py: 8 }}>
               <Typography variant="h2" gutterBottom>
                 אין קבוצות פעילות
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                התחל ליצור קבוצה פעילה חדשה
-              </Typography>
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                component={Link}
-                href="/dashboard/create-group"
-              >
-                צור קבוצה חדשה
-              </Button>
+                צרו קבוצה חדשה כדי להתחיל
+                              </Typography>
             </CardContent>
           </Card>
         ) : (
@@ -204,7 +156,7 @@ export default function DashboardPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {activeGroups.map((group) => (
+                {runningGroups.map((group) => (
                   <TableRow key={group.id}>
                     <TableCell>{group.title}</TableCell>
                     <TableCell>{group.category}</TableCell>
@@ -219,8 +171,8 @@ export default function DashboardPage() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={getStatusLabel(group.status)}
-                        color={getStatusColor(group.status) as any}
+                        label={statusToLabelAndColorMap[group.status].label}
+                        color={statusToLabelAndColorMap[group.status].color}
                         size="small"
                       />
                     </TableCell>
@@ -233,14 +185,24 @@ export default function DashboardPage() {
                       >
                         <Visibility />
                       </IconButton>
-                      <IconButton
-                        component={Link}
-                        href={`/dashboard/groups/${group.id}/edit`}
-                        color="primary"
-                        size="small"
-                      >
-                        <Edit />
-                      </IconButton>
+                      {group.status === GroupStatus.OPEN || group.status === GroupStatus.ACTIVATED ? (
+                        <IconButton
+                          component={Link}
+                          href={`/dashboard/groups/${group.id}/edit`}
+                          color="primary"
+                          size="small"
+                        >
+                          <Edit />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          color="inherit"
+                          size="small"
+                          disabled
+                        >
+                          <Edit />
+                        </IconButton>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

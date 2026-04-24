@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, RoleLevel } from "@/lib/auth";
-import { GroupStatus } from "@prisma/client";
+import { requireAuth } from "@/lib/auth";
+import { RoleLevel } from "@/lib/types/role";
+import { GroupStatus } from "@/lib/types/status";
 
 export async function GET(req: Request) {
   try {
@@ -46,7 +47,6 @@ export async function POST(req: Request) {
 
     const userId = user!.id;
     
-    // Check package directly via userId
     const b2bPackage = await prisma.b2BPackage.findUnique({
       where: { userId },
     });
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     const activeGroupsCount = await prisma.activeGroup.count({
       where: {
         createdById: userId,
-        status: { in: ["OPEN", "PENDING"] },
+        status: GroupStatus.OPEN,
       },
     });
 

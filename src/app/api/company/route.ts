@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, RoleLevel } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { RoleLevel } from "@/lib/types/role";
 
 export async function GET(req: Request) {
   try {
@@ -11,7 +12,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
     }
 
-    console.log(user);
     const company = await prisma.company.findFirst({
       where: { ownerId: user.id },
       include: {

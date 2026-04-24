@@ -17,8 +17,6 @@ import {
   CardContent,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
-import Header from "@/components/header/header";
-import Footer from "@/components/footer/footer";
 import Link from "next/link";
 import GroupForm, { GroupFormData } from "@/components/groups/GroupForm";
 

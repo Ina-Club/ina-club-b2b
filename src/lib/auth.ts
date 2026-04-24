@@ -1,43 +1,44 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { Role } from "@prisma/client";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { RoleLevel } from "./types/role";
 
 /* ======================
    Role levels
 ====================== */
 
-export enum RoleLevel {
-  USER = 0,
-  BUSINESS = 1,
-  ADMIN = 2,
-}
-
-export function roleToLevel(role: Role): RoleLevel {
-  switch (role) {
-    case Role.USER:
-      return RoleLevel.USER;
-    case Role.BUSINESS:
-      return RoleLevel.BUSINESS
-    case Role.ADMIN:
-      return RoleLevel.ADMIN;
-    default:
-      throw new Error(`Unhandled role: ${role}`);
-  }
-}
+// Not used at the moment, leaving code for future use.
+// export function roleToLevel(role: Role): RoleLevel {
+//   switch (role) {
+//     case Role.USER:
+//       return RoleLevel.USER;
+//     case Role.BUSINESS:
+//       return RoleLevel.BUSINESS
+//     case Role.ADMIN:
+//       return RoleLevel.ADMIN;
+//     default:
+//       throw new Error(`Unhandled role: ${role}`);
+//   }
+// }
 
 /* ======================
    Require auth + role
 ====================== */
 
 export async function requireAuth(minRole: RoleLevel) {
+  
+  // Role mechanism currently does not do anything.
+  // We don't allow users to create accounts for the b2b.
+  // Therefore, role validation is not required at the moment.
+  // However, I have left the Role logic and param passed to this function for future use. 
+
   try {
     const { userId } = await auth();
 
     if (!userId) {
       return {
         user: null,
-        response: NextResponse.json({ error: "לא מורשה" }, { status: 401 }),
+        response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
       };
     }
 
@@ -45,30 +46,13 @@ export async function requireAuth(minRole: RoleLevel) {
     if (!clerkUser) {
       return {
         user: null,
-        response: NextResponse.json({ error: "משתמש לא נמצא ב-Clerk" }, { status: 404 }),
-      };
-    }
-
-    // Since we don't have a User table anymore, we might need to store roles in Clerk metadata.
-    // For now, we'll assume BUSINESS role if they are signed into B2B.
-    // Or we can check if they have a B2B package.
-    const b2bPackage = await prisma.b2BPackage.findUnique({
-      where: { userId },
-    });
-
-    const userRole = (clerkUser.publicMetadata.role as Role) || Role.BUSINESS;
-
-    if (roleToLevel(userRole) < minRole) {
-      return {
-        user: null,
-        response: NextResponse.json({ error: "אין הרשאה" }, { status: 403 }),
+        response: NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 }),
       };
     }
 
     return { 
       user: { 
         id: userId, 
-        role: userRole, 
         email: clerkUser.emailAddresses[0]?.emailAddress,
         name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || clerkUser.username
       }, 
@@ -119,7 +103,7 @@ export async function getCurrentUser() {
       email: clerkUser.emailAddresses[0]?.emailAddress,
       name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || clerkUser.username,
       profilePicture: clerkUser.imageUrl,
-      role: (clerkUser.publicMetadata.role as Role) || Role.BUSINESS,
+      role: clerkUser.publicMetadata.role || RoleLevel.BUSINESS,
       b2bPackage,
       company,
     };
@@ -127,14 +111,4 @@ export async function getCurrentUser() {
     console.error("Error in getCurrentUser:", error);
     return null;
   }
-}
-
-/* ======================
-   Utility
-====================== */
-
-export async function getUserIdByEmail(email: string) {
-  // This is tricky without a local User table. 
-  // We'd need to search Clerk users.
-  return null;
 }
