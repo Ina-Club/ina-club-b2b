@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { RoleLevel } from "@/lib/types/role";
+import { clerkClient } from "@clerk/nextjs/server";
+import { GroupStatus } from "@/lib/types/status";
 
 export async function GET(
     req: Request,
@@ -78,6 +80,19 @@ export async function PUT(
             );
         }
 
+        const isRunning = [GroupStatus.OPEN, GroupStatus.ACTIVATED].includes(existingGroup.status as GroupStatus);
+
+        const client = await clerkClient();
+        const serverUser = await client.users.getUser(user.id);
+        const isAdmin = serverUser.publicMetadata.role === RoleLevel.ADMIN;
+        
+        if (!isRunning && !isAdmin) {
+            return NextResponse.json(
+                { error: "לא ניתן לערוך קבוצה בסטטוס זה" },
+                { status: 403 }
+            );
+        }
+
         const body = await req.json();
         const {
             title,
@@ -93,56 +108,42 @@ export async function PUT(
             registrationTerms,
         } = body;
 
-        // Validate essential fields
-        if (
-            !title ||
-            !description ||
-            !categoryId ||
-            !companyId ||
-            !basePrice ||
-            !groupPrice ||
-            !deadline
-        ) {
-            return NextResponse.json({ error: "כל השדות נדרשים" }, { status: 400 });
+        const updateData: Record<string, any> = {};
+
+        // Any user can update participants count
+        if (minParticipants !== undefined) {
+            updateData.minParticipants = minParticipants ? parseInt(minParticipants) : null;
+        }
+        if (maxParticipants !== undefined) {
+            updateData.maxParticipants = maxParticipants ? parseInt(maxParticipants) : null;
         }
 
-        // Update basic details
+        // Only admins can update the rest
+        if (isAdmin) {
+            if (title !== undefined) updateData.title = title;
+            if (description !== undefined) updateData.description = description;
+            if (categoryId !== undefined) updateData.categoryId = categoryId;
+            if (companyId !== undefined) updateData.companyId = companyId;
+            if (basePrice !== undefined) updateData.basePrice = parseFloat(basePrice);
+            if (groupPrice !== undefined) updateData.groupPrice = parseFloat(groupPrice);
+            if (deadline !== undefined) updateData.deadline = new Date(deadline);
+            if (registrationTerms !== undefined) updateData.registrationTerms = registrationTerms;
+        }
+
+        // Update allowed details
         await prisma.activeGroup.update({
             where: { id: groupId },
-            data: {
-                title,
-                description,
-                categoryId,
-                companyId,
-                basePrice: parseFloat(basePrice),
-                groupPrice: parseFloat(groupPrice),
-                deadline: new Date(deadline),
-                minParticipants: minParticipants ? parseInt(minParticipants) : null,
-                maxParticipants: maxParticipants ? parseInt(maxParticipants) : null,
-                registrationTerms: registrationTerms || "",
-            },
+            data: updateData,
         });
 
-        // Handle Images
-        // 1. Remove existing images not in the new list (if we were tracking IDs, but here we just have URLs)
-        // A simpler strategy for this MVP: 
-        // - Delete all ActiveGroupImage relations for this group
-        // - Re-create them from the input list.
-        // - Note: This leaves orphaned Image records if we are not careful, but for now it's acceptable or we can try to reuse.
-        // Better:
-        // The URLs passed are what should be there.
+        // Only update images if explicitly provided in the request
+        if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+            // Delete all current image associations and re-add from the new list.
+            // Reuse existing Image records by URL to avoid duplicates.
+            await prisma.activeGroupImage.deleteMany({
+                where: { activeGroupId: groupId }
+            });
 
-        // First, delete all current image associations
-        await prisma.activeGroupImage.deleteMany({
-            where: { activeGroupId: groupId }
-        });
-
-        // Now re-add them. 
-        // If a URL already exists in Image table, reuse it? 
-        // Or just create new ones? The schema has no unique constraint on URL.
-        // Let's try to reuse if URL exists to avoid duplicates.
-
-        if (imageUrls && Array.isArray(imageUrls)) {
             const promises = imageUrls.map(async (url: string, i: number) => {
                 let image = await prisma.image.findFirst({ where: { url } });
                 if (!image) {

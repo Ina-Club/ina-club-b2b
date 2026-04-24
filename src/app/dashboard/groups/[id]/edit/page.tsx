@@ -16,6 +16,7 @@ import {
 import { ArrowBack } from "@mui/icons-material";
 import Link from "next/link";
 import GroupForm, { GroupFormData } from "@/components/groups/GroupForm";
+import { GroupStatus } from "@/lib/types/status";
 
 interface Category {
     id: string;
@@ -38,6 +39,7 @@ export default function EditGroupPage() {
     const [success, setSuccess] = useState(false);
 
     const [initialData, setInitialData] = useState<GroupFormData | null>(null);
+    const [groupStatus, setGroupStatus] = useState<string | null>(null);
     const [categories, setCategories] = useState<Category[]>([]);
     const [companies, setCompanies] = useState<Company[]>([]);
 
@@ -70,6 +72,8 @@ export default function EditGroupPage() {
 
             const groupData = await groupRes.json();
             const g = groupData.group;
+
+            setGroupStatus(g.status);
 
             setInitialData({
                 title: g.title,
@@ -135,6 +139,26 @@ export default function EditGroupPage() {
         );
     }
 
+    if (groupStatus && groupStatus !== GroupStatus.OPEN && groupStatus !== GroupStatus.ACTIVATED) {
+        return (
+            <Container maxWidth="md" sx={{ py: 4 }}>
+                <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<ArrowBack />}
+                        component={Link}
+                        href="/dashboard/groups"
+                    >
+                        חזרה לקבוצות שלי
+                    </Button>
+                </Box>
+                <Alert severity="warning">
+                    לא ניתן לערוך קבוצה שאינה במצב פתוחה או פעילה.
+                </Alert>
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
             <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
@@ -174,6 +198,7 @@ export default function EditGroupPage() {
                             onSubmit={handleSubmit}
                             loading={saving}
                             isEditing
+                            groupStatus={groupStatus}
                         />
                     )}
                 </CardContent>
