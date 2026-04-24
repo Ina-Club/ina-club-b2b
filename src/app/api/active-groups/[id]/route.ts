@@ -136,26 +136,14 @@ export async function PUT(
             data: updateData,
         });
 
-        // Handle Images
-        // 1. Remove existing images not in the new list (if we were tracking IDs, but here we just have URLs)
-        // A simpler strategy for this MVP: 
-        // - Delete all ActiveGroupImage relations for this group
-        // - Re-create them from the input list.
-        // - Note: This leaves orphaned Image records if we are not careful, but for now it's acceptable or we can try to reuse.
-        // Better:
-        // The URLs passed are what should be there.
+        // Only update images if explicitly provided in the request
+        if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+            // Delete all current image associations and re-add from the new list.
+            // Reuse existing Image records by URL to avoid duplicates.
+            await prisma.activeGroupImage.deleteMany({
+                where: { activeGroupId: groupId }
+            });
 
-        // First, delete all current image associations
-        await prisma.activeGroupImage.deleteMany({
-            where: { activeGroupId: groupId }
-        });
-
-        // Now re-add them. 
-        // If a URL already exists in Image table, reuse it? 
-        // Or just create new ones? The schema has no unique constraint on URL.
-        // Let's try to reuse if URL exists to avoid duplicates.
-
-        if (imageUrls && Array.isArray(imageUrls)) {
             const promises = imageUrls.map(async (url: string, i: number) => {
                 let image = await prisma.image.findFirst({ where: { url } });
                 if (!image) {

@@ -272,7 +272,7 @@ export default function GroupForm({
                 {/* Image Upload Section */}
                 <Box>
                     <Typography variant="subtitle1" gutterBottom>
-                        תמונות (חובה להעלות לפחות תמונה אחת)
+                        {isEditing ? "תמונות (נדרשת לפחות תמונה אחת)" : "תמונות (חובה להעלות לפחות תמונה אחת)"}
                     </Typography>
 
                     <input
