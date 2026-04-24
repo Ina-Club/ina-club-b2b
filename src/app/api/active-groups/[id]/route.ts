@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { RoleLevel } from "@/lib/types/role";
+import { clerkClient } from "@clerk/nextjs/server";
+import { GroupStatus } from "@/lib/types/status";
 
 export async function GET(
     req: Request,
@@ -78,6 +80,19 @@ export async function PUT(
             );
         }
 
+        const isRunning = [GroupStatus.OPEN, GroupStatus.ACTIVATED].includes(existingGroup.status as GroupStatus);
+
+        const client = await clerkClient();
+        const serverUser = await client.users.getUser(user.id);
+        const isAdmin = serverUser.publicMetadata.role === RoleLevel.ADMIN;
+        
+        if (!isRunning && !isAdmin) {
+            return NextResponse.json(
+                { error: "לא ניתן לערוך קבוצה בסטטוס זה" },
+                { status: 403 }
+            );
+        }
+
         const body = await req.json();
         const {
             title,
@@ -93,34 +108,32 @@ export async function PUT(
             registrationTerms,
         } = body;
 
-        // Validate essential fields
-        if (
-            !title ||
-            !description ||
-            !categoryId ||
-            !companyId ||
-            !basePrice ||
-            !groupPrice ||
-            !deadline
-        ) {
-            return NextResponse.json({ error: "כל השדות נדרשים" }, { status: 400 });
+        const updateData: Record<string, any> = {};
+
+        // Any user can update participants count
+        if (minParticipants !== undefined) {
+            updateData.minParticipants = minParticipants ? parseInt(minParticipants) : null;
+        }
+        if (maxParticipants !== undefined) {
+            updateData.maxParticipants = maxParticipants ? parseInt(maxParticipants) : null;
         }
 
-        // Update basic details
+        // Only admins can update the rest
+        if (isAdmin) {
+            if (title !== undefined) updateData.title = title;
+            if (description !== undefined) updateData.description = description;
+            if (categoryId !== undefined) updateData.categoryId = categoryId;
+            if (companyId !== undefined) updateData.companyId = companyId;
+            if (basePrice !== undefined) updateData.basePrice = parseFloat(basePrice);
+            if (groupPrice !== undefined) updateData.groupPrice = parseFloat(groupPrice);
+            if (deadline !== undefined) updateData.deadline = new Date(deadline);
+            if (registrationTerms !== undefined) updateData.registrationTerms = registrationTerms;
+        }
+
+        // Update allowed details
         await prisma.activeGroup.update({
             where: { id: groupId },
-            data: {
-                title,
-                description,
-                categoryId,
-                companyId,
-                basePrice: parseFloat(basePrice),
-                groupPrice: parseFloat(groupPrice),
-                deadline: new Date(deadline),
-                minParticipants: minParticipants ? parseInt(minParticipants) : null,
-                maxParticipants: maxParticipants ? parseInt(maxParticipants) : null,
-                registrationTerms: registrationTerms || "",
-            },
+            data: updateData,
         });
 
         // Handle Images

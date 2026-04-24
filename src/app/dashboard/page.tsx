@@ -185,14 +185,24 @@ export default function DashboardPage() {
                       >
                         <Visibility />
                       </IconButton>
-                      <IconButton
-                        component={Link}
-                        href={`/dashboard/groups/${group.id}/edit`}
-                        color="primary"
-                        size="small"
-                      >
-                        <Edit />
-                      </IconButton>
+                      {group.status === GroupStatus.OPEN || group.status === GroupStatus.ACTIVATED ? (
+                        <IconButton
+                          component={Link}
+                          href={`/dashboard/groups/${group.id}/edit`}
+                          color="primary"
+                          size="small"
+                        >
+                          <Edit />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          color="inherit"
+                          size="small"
+                          disabled
+                        >
+                          <Edit />
+                        </IconButton>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

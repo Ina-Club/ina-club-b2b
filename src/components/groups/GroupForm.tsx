@@ -15,6 +15,7 @@ import {
 import { Save, CloudUpload, Delete } from "@mui/icons-material";
 import Image from "next/image";
 import Link from "next/link";
+import { GroupStatus } from "@/lib/types/status";
 
 interface Category {
     id: string;
@@ -48,6 +49,7 @@ interface GroupFormProps {
     loading?: boolean;
     isEditing?: boolean;
     userCompanyId?: string | null; // If provided, locks the company selection
+    groupStatus?: string | null;
 }
 
 export default function GroupForm({
@@ -58,6 +60,7 @@ export default function GroupForm({
     loading = false,
     isEditing = false,
     userCompanyId,
+    groupStatus,
 }: GroupFormProps) {
     const [formData, setFormData] = useState<GroupFormData>(
         initialData || {
@@ -81,6 +84,10 @@ export default function GroupForm({
     const handleChange = (field: keyof GroupFormData, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
+
+    const isRunning = groupStatus === GroupStatus.OPEN || groupStatus === GroupStatus.ACTIVATED;
+    const isFullyLocked = isEditing && !isRunning;
+    const disableBasicFields = isEditing;
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -148,6 +155,7 @@ export default function GroupForm({
                     onChange={(e) => handleChange("title", e.target.value)}
                     required
                     fullWidth
+                    disabled={disableBasicFields}
                 />
 
                 <TextField
@@ -158,6 +166,7 @@ export default function GroupForm({
                     multiline
                     rows={4}
                     fullWidth
+                    disabled={disableBasicFields}
                 />
 
                 <TextField
@@ -167,6 +176,7 @@ export default function GroupForm({
                     multiline
                     rows={3}
                     fullWidth
+                    disabled={disableBasicFields}
                     helperText="תנאים שחברי מועדון יצטרכו לאשר לפני ההצטרפות (למשל: תנאי ביטול, זמני אספקה, איסוף עצמי בלבד וכו׳)"
                 />
 
@@ -177,6 +187,7 @@ export default function GroupForm({
                     onChange={(e) => handleChange("categoryId", e.target.value)}
                     required
                     fullWidth
+                    disabled={disableBasicFields}
                 >
                     {categories.map((cat) => (
                         <MenuItem key={cat.id} value={cat.id}>
@@ -192,7 +203,7 @@ export default function GroupForm({
                     onChange={(e) => handleChange("companyId", e.target.value)}
                     required
                     fullWidth
-                    disabled={!!userCompanyId} // Disable if userCompanyId is provided (enforced)
+                    disabled={!!userCompanyId || disableBasicFields} // Disable if userCompanyId is provided (enforced) or if editing
                 >
                     {companies.map((comp) => (
                         <MenuItem key={comp.id} value={comp.id}>
@@ -209,6 +220,7 @@ export default function GroupForm({
                         onChange={(e) => handleChange("basePrice", e.target.value)}
                         required
                         fullWidth
+                        disabled={disableBasicFields}
                         inputProps={{ step: "0.01", min: "0" }}
                     />
 
@@ -219,6 +231,7 @@ export default function GroupForm({
                         onChange={(e) => handleChange("groupPrice", e.target.value)}
                         required
                         fullWidth
+                        disabled={disableBasicFields}
                         inputProps={{ step: "0.01", min: "0" }}
                     />
                 </Box>
@@ -230,6 +243,7 @@ export default function GroupForm({
                     onChange={(e) => handleChange("deadline", e.target.value)}
                     required
                     fullWidth
+                    disabled={disableBasicFields}
                     InputLabelProps={{ shrink: true }}
                 />
 
@@ -240,6 +254,7 @@ export default function GroupForm({
                         value={formData.minParticipants}
                         onChange={(e) => handleChange("minParticipants", e.target.value)}
                         fullWidth
+                        disabled={isFullyLocked}
                         inputProps={{ min: "1" }}
                     />
 
@@ -249,6 +264,7 @@ export default function GroupForm({
                         value={formData.maxParticipants}
                         onChange={(e) => handleChange("maxParticipants", e.target.value)}
                         fullWidth
+                        disabled={isFullyLocked}
                         inputProps={{ min: "1" }}
                     />
                 </Box>
@@ -266,19 +282,22 @@ export default function GroupForm({
                         style={{ display: "none" }}
                         ref={fileInputRef}
                         onChange={handleImageUpload}
+                        disabled={isFullyLocked}
                     />
 
-                    <Button
-                        variant="outlined"
-                        startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        sx={{ mb: 2 }}
-                    >
-                        {uploading ? "מעלה..." : "העלה תמונות"}
-                    </Button>
+                    {!isFullyLocked && (
+                        <Button
+                            variant="outlined"
+                            startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                            sx={{ mb: 2 }}
+                        >
+                            {uploading ? "מעלה..." : "העלה תמונות"}
+                        </Button>
+                    )}
 
-                    {formData.imageUrls.length === 0 && (
+                    {formData.imageUrls.length === 0 && !isFullyLocked && (
                         <FormHelperText error>יש להעלות לפחות תמונה אחת</FormHelperText>
                     )}
 
@@ -301,19 +320,21 @@ export default function GroupForm({
                                     fill
                                     style={{ objectFit: "cover" }}
                                 />
-                                <IconButton
-                                    size="small"
-                                    onClick={() => removeImage(index)}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 2,
-                                        right: 2,
-                                        bgcolor: "rgba(255,255,255,0.8)",
-                                        "&:hover": { bgcolor: "white" },
-                                    }}
-                                >
-                                    <Delete fontSize="small" color="error" />
-                                </IconButton>
+                                {!isFullyLocked && (
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => removeImage(index)}
+                                        sx={{
+                                            position: "absolute",
+                                            top: 2,
+                                            right: 2,
+                                            bgcolor: "rgba(255,255,255,0.8)",
+                                            "&:hover": { bgcolor: "white" },
+                                        }}
+                                    >
+                                        <Delete fontSize="small" color="error" />
+                                    </IconButton>
+                                )}
                             </Box>
                         ))}
                     </Box>
@@ -332,7 +353,7 @@ export default function GroupForm({
                         type="submit"
                         variant="contained"
                         startIcon={loading ? <CircularProgress size={20} /> : <Save />}
-                        disabled={loading || formData.imageUrls.length === 0}
+                        disabled={loading || formData.imageUrls.length === 0 || isFullyLocked}
                     >
                         {loading ? "שומר..." : isEditing ? "עדכן קבוצה" : "צור קבוצה"}
                     </Button>
