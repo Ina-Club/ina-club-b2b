@@ -63,9 +63,11 @@ export async function POST(req: Request) {
     // Send email using Resend
     if (resend && process.env.RESEND_API_KEY) {
       try {
+        const receiverEmail = process.env.NODE_ENV === "development" ? process.env.RESEND_TEST_EMAIL : process.env.EMAIL_TO;
+        if (!receiverEmail) throw new Error("Receiver email not configured");
         const { data, error } = await resend.emails.send({
           from: process.env.EMAIL_FROM || "Ina Club B2B <noreply@inaclub.com>",
-          to: email,
+          to: receiverEmail,
           subject: `בקשה חדשה לבחירת חבילה - ${planTitle}`,
           html: emailContent,
         });
