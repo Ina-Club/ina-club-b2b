@@ -10,11 +10,7 @@ import {
   useTheme
 } from "@mui/material";
 import {
-  Facebook as FacebookIcon,
   Instagram as InstagramIcon,
-  Twitter as TwitterIcon,
-  LinkedIn as LinkedInIcon,
-  YouTube as YouTubeIcon,
   Email as EmailIcon,
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
@@ -22,6 +18,7 @@ import {
 
 export default function Footer() {
   const theme = useTheme();
+  const INA_CLUB_INSTAGRAM_URL = "https://www.instagram.com/inaclub.official"
 
   return (
     <Box
@@ -53,49 +50,10 @@ export default function Footer() {
                   color: "white",
                   "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
                 }}
-                aria-label="פייסבוק"
-              >
-                <FacebookIcon />
-              </IconButton>
-              <IconButton
-                sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                  color: "white",
-                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
-                }}
                 aria-label="אינסטגרם"
+                href={INA_CLUB_INSTAGRAM_URL}
               >
                 <InstagramIcon />
-              </IconButton>
-              <IconButton
-                sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                  color: "white",
-                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
-                }}
-                aria-label="טוויטר"
-              >
-                <TwitterIcon />
-              </IconButton>
-              <IconButton
-                sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                  color: "white",
-                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
-                }}
-                aria-label="לינקדאין"
-              >
-                <LinkedInIcon />
-              </IconButton>
-              <IconButton
-                sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                  color: "white",
-                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
-                }}
-                aria-label="יוטיוב"
-              >
-                <YouTubeIcon />
               </IconButton>
             </Box>
           </Box>
