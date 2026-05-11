@@ -19,6 +19,7 @@ import {
 export default function Footer() {
   const theme = useTheme();
   const INA_CLUB_INSTAGRAM_URL = "https://www.instagram.com/inaclub.official"
+  const INA_CLUB_EMAIL = "support@inaclub.co.il"
 
   return (
     <Box
@@ -67,7 +68,7 @@ export default function Footer() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <EmailIcon sx={{ fontSize: 20 }} />
                 <Typography variant="body2">
-                  info@inaclub.co.il
+                  {INA_CLUB_EMAIL}
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
