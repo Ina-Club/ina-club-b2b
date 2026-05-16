@@ -37,7 +37,6 @@ interface Participant {
   userId: string;
   name: string;
   email: string;
-  phone: string | null;
   joinedAt: string;
   couponCode?: string | null;
 }
@@ -266,7 +265,6 @@ export default function ParticipantsPage() {
                 <TableRow>
                   <TableCell>שם מלא</TableCell>
                   <TableCell>אימייל</TableCell>
-                  <TableCell>טלפון</TableCell>
                   <TableCell>תאריך הצטרפות</TableCell>
                   {(groupInfo?.status === "ACTIVATED" || groupInfo?.status === "RESOLVED") && (
                     <TableCell align="center">קוד קופון</TableCell>
@@ -281,7 +279,6 @@ export default function ParticipantsPage() {
                   <TableRow key={participant.id}>
                     <TableCell>{participant.name || "ללא שם"}</TableCell>
                     <TableCell>{participant.email}</TableCell>
-                    <TableCell>{participant.phone || "לא צוין"}</TableCell>
                     <TableCell>
                       {new Date(participant.joinedAt).toLocaleDateString("he-IL", {
                         year: "numeric",
@@ -334,7 +331,6 @@ export default function ParticipantsPage() {
                       <TableRow>
                         <TableCell>שם מלא</TableCell>
                         <TableCell>אימייל</TableCell>
-                        <TableCell>טלפון</TableCell>
                         <TableCell>תאריך עזיבה</TableCell>
                       </TableRow>
                     </TableHead>
@@ -343,7 +339,6 @@ export default function ParticipantsPage() {
                         <TableRow key={user.id}>
                           <TableCell>{user.name}</TableCell>
                           <TableCell>{user.email}</TableCell>
-                          <TableCell>{user.phone || "לא צוין"}</TableCell>
                           <TableCell>
                             {user.joinedAt ? new Date(user.joinedAt).toLocaleDateString("he-IL", {
                               year: "numeric",

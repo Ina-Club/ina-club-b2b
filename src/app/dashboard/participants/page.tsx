@@ -25,7 +25,6 @@ interface Participant {
   userId: string;
   name: string | null;
   email: string;
-  phone: string | null;
   groups: Array<{
     groupId: string;
     groupTitle: string;
@@ -116,7 +115,6 @@ export default function ParticipantsPage() {
                 <TableRow>
                   <TableCell>שם</TableCell>
                   <TableCell>אימייל</TableCell>
-                  <TableCell>טלפון</TableCell>
                   <TableCell>קבוצות</TableCell>
                 </TableRow>
               </TableHead>
@@ -125,7 +123,6 @@ export default function ParticipantsPage() {
                   <TableRow key={participant.userId}>
                     <TableCell>{participant.name || "ללא שם"}</TableCell>
                     <TableCell>{participant.email}</TableCell>
-                    <TableCell>{participant.phone || "לא צוין"}</TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                         {participant.groups.map((group) => (
