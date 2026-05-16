@@ -66,7 +66,7 @@ export async function POST(req: Request) {
         const receiverEmail = process.env.NODE_ENV === "development" ? process.env.RESEND_TEST_EMAIL : process.env.EMAIL_TO;
         if (!receiverEmail) throw new Error("Receiver email not configured");
         const { data, error } = await resend.emails.send({
-          from: process.env.EMAIL_FROM || "Ina Club B2B <noreply@inaclub.com>",
+          from: process.env.EMAIL_FROM || "Ina Club B2B <noreply@inaclub.co.il>",
           to: receiverEmail,
           subject: `בקשה חדשה לבחירת חבילה - ${planTitle}`,
           html: emailContent,
@@ -82,8 +82,6 @@ export async function POST(req: Request) {
       }
     } else {
       console.warn("Resend not configured. Please install 'resend' package and set RESEND_API_KEY environment variable.");
-      // Log the email content for debugging
-      console.log("Email would be sent to idan040202@gmail.com with content:", emailContent);
     }
 
     return NextResponse.json(
