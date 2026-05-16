@@ -17,7 +17,6 @@ import Link from "next/link";
 import PricingSection from "@/components/pricing/pricing-section";
 import ContactSection from "@/components/contact/contact";
 
-// שלבים של "איך זה עובד"
 const steps = [
   {
     title: "בחירת חבילה",
@@ -28,13 +27,13 @@ const steps = [
   {
     title: "יצירת קבוצות",
     description:
-      "צור קבוצות פעילות חדשות, הגדר מחירים, תאריכי יעד ומגבלות משתתפים. הכל במקום אחד.",
+      "צור קבוצות רכישה חדשות, הגדר מחירים, תאריכי יעד ומגבלות משתתפים.",
     icon: <Analytics sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />,
   },
   {
     title: "ניהול משתתפים",
     description:
-      "צפה בכל הפרטים של המשתתפים: שם מלא, אימייל, טלפון וכל המידע הרלוונטי בטבלה מאורגנת.",
+      "צפה בפרטי המשתתפים וכל המידע הרלוונטי בטבלה מאורגנת.",
     icon: <People sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />,
   },
   {
@@ -197,8 +196,9 @@ export default function HomePage() {
               fontSize: { md: "1.5rem", xs: "1rem" },
             }}
           >
-            ניהול פשוט ויעיל של קבוצות פעילות. צור קבוצות, עקוב אחר משתתפים וצפה
-            בכל הפרטים בטבלה מאורגנת.
+            ניהול פשוט ויעיל של קבוצות רכישה.
+            <br />
+            צור קבוצות, עקוב אחר משתתפים וצפה בכל הפרטים בטבלה מאורגנת.
           </Typography>
 
           <Box

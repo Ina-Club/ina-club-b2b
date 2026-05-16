@@ -15,7 +15,7 @@ const SCROLL_SECTIONS = [
 ];
 
 export default function Header() {
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState<number | null>(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const { isSignedIn } = useUser();
   const { signOut } = useClerk();
@@ -60,7 +60,7 @@ export default function Header() {
 
           {/* Tabs */}
           {!isSignedIn && !isMobile && (
-            <Tabs value={currentTab}>
+            <Tabs value={currentTab !== null ? currentTab : false}>
               {SCROLL_SECTIONS.map((item, i) => (
                 <Tab
                   key={item.id}
