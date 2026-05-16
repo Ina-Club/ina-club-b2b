@@ -53,7 +53,7 @@ export async function PUT(
     context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { user, response } = await requireAuth(RoleLevel.BUSINESS);
+        const { user, response } = await requireAuth(RoleLevel.ADMIN);
         if (response) return response;
 
         const { params } = context;
@@ -80,18 +80,12 @@ export async function PUT(
             );
         }
 
-        const isRunning = [GroupStatus.OPEN, GroupStatus.ACTIVATED].includes(existingGroup.status as GroupStatus);
-
         const client = await clerkClient();
         const serverUser = await client.users.getUser(user.id);
         const isAdmin = serverUser.publicMetadata.role === RoleLevel.ADMIN;
         
-        if (!isRunning && !isAdmin) {
-            return NextResponse.json(
-                { error: "לא ניתן לערוך קבוצה בסטטוס זה" },
-                { status: 403 }
-            );
-        }
+        // Currently, only admins can edit groups
+        if (!isAdmin) return NextResponse.json({ error: "Unauthorized!" }, { status: 401 });
 
         const body = await req.json();
         const {

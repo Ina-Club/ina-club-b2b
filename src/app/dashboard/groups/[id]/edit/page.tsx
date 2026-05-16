@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, notFound } from "next/navigation";
 import {
     Box,
     Container,
@@ -29,180 +29,183 @@ interface Company {
 }
 
 export default function EditGroupPage() {
-    const { id: groupId } = useParams<{ id: string }>();
-    const { isSignedIn, isLoaded } = useUser();
-    const router = useRouter();
+    // Disable access to this page for now
+    notFound();
 
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState<string>("");
-    const [success, setSuccess] = useState(false);
+    // const { id: groupId } = useParams<{ id: string }>();
+    // const { isSignedIn, isLoaded } = useUser();
+    // const router = useRouter();
 
-    const [initialData, setInitialData] = useState<GroupFormData | null>(null);
-    const [groupStatus, setGroupStatus] = useState<string | null>(null);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [companies, setCompanies] = useState<Company[]>([]);
+    // const [loading, setLoading] = useState(true);
+    // const [saving, setSaving] = useState(false);
+    // const [error, setError] = useState<string>("");
+    // const [success, setSuccess] = useState(false);
 
-    useEffect(() => {
-        if (!isLoaded || !groupId) return;
+    // const [initialData, setInitialData] = useState<GroupFormData | null>(null);
+    // const [groupStatus, setGroupStatus] = useState<string | null>(null);
+    // const [categories, setCategories] = useState<Category[]>([]);
+    // const [companies, setCompanies] = useState<Company[]>([]);
 
-        if (!isSignedIn) {
-            router.push(`/sign-in?redirect_url=/dashboard/groups/${groupId}/edit`);
-            return;
-        }
+    // useEffect(() => {
+    //     if (!isLoaded || !groupId) return;
 
-        fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoaded, isSignedIn, groupId]);
+    //     if (!isSignedIn) {
+    //         router.push(`/sign-in?redirect_url=/dashboard/groups/${groupId}/edit`);
+    //         return;
+    //     }
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
+    //     fetchData();
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [isLoaded, isSignedIn, groupId]);
 
-            const [groupRes, categoriesRes, companiesRes] = await Promise.all([
-                fetch(`/api/active-groups/${groupId}`),
-                fetch("/api/categories"),
-                fetch("/api/companies"),
-            ]);
+    // const fetchData = async () => {
+    //     try {
+    //         setLoading(true);
 
-            if (!groupRes.ok) {
-                setError("לא ניתן לטעון את פרטי הקבוצה");
-                return;
-            }
+    //         const [groupRes, categoriesRes, companiesRes] = await Promise.all([
+    //             fetch(`/api/active-groups/${groupId}`),
+    //             fetch("/api/categories"),
+    //             fetch("/api/companies"),
+    //         ]);
 
-            const groupData = await groupRes.json();
-            const g = groupData.group;
+    //         if (!groupRes.ok) {
+    //             setError("לא ניתן לטעון את פרטי הקבוצה");
+    //             return;
+    //         }
 
-            setGroupStatus(g.status);
+    //         const groupData = await groupRes.json();
+    //         const g = groupData.group;
 
-            setInitialData({
-                title: g.title,
-                description: g.description,
-                categoryId: g.categoryId,
-                companyId: g.companyId,
-                basePrice: g.basePrice.toString(),
-                groupPrice: g.groupPrice.toString(),
-                deadline: new Date(g.deadline).toISOString().slice(0, 16),
-                minParticipants: g.minParticipants?.toString() || "",
-                maxParticipants: g.maxParticipants?.toString() || "",
-                registrationTerms: g.registrationTerms || "",
-                imageUrls: g.images.map((img: any) => img.image.url),
-            });
+    //         setGroupStatus(g.status);
 
-            if (categoriesRes.ok) {
-                setCategories((await categoriesRes.json()).categories || []);
-            }
+    //         setInitialData({
+    //             title: g.title,
+    //             description: g.description,
+    //             categoryId: g.categoryId,
+    //             companyId: g.companyId,
+    //             basePrice: g.basePrice.toString(),
+    //             groupPrice: g.groupPrice.toString(),
+    //             deadline: new Date(g.deadline).toISOString().slice(0, 16),
+    //             minParticipants: g.minParticipants?.toString() || "",
+    //             maxParticipants: g.maxParticipants?.toString() || "",
+    //             registrationTerms: g.registrationTerms || "",
+    //             imageUrls: g.images.map((img: any) => img.image.url),
+    //         });
 
-            if (companiesRes.ok) {
-                setCompanies((await companiesRes.json()).companies || []);
-            }
-        } catch (err) {
-            console.error(err);
-            setError("שגיאה בטעינת הנתונים");
-        } finally {
-            setLoading(false);
-        }
-    };
+    //         if (categoriesRes.ok) {
+    //             setCategories((await categoriesRes.json()).categories || []);
+    //         }
 
-    const handleSubmit = async (formData: GroupFormData) => {
-        setError("");
-        setSaving(true);
+    //         if (companiesRes.ok) {
+    //             setCompanies((await companiesRes.json()).companies || []);
+    //         }
+    //     } catch (err) {
+    //         console.error(err);
+    //         setError("שגיאה בטעינת הנתונים");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
-        try {
-            const res = await fetch(`/api/active-groups/${groupId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+    // const handleSubmit = async (formData: GroupFormData) => {
+    //     setError("");
+    //     setSaving(true);
 
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || "שגיאה בעדכון הקבוצה");
-            }
+    //     try {
+    //         const res = await fetch(`/api/active-groups/${groupId}`, {
+    //             method: "PUT",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify(formData),
+    //         });
 
-            setSuccess(true);
-            setTimeout(() => {
-                router.push("/dashboard/groups");
-            }, 2000);
-        } catch (err: any) {
-            setError(err.message || "שגיאה בעדכון הקבוצה");
-        } finally {
-            setSaving(false);
-        }
-    };
+    //         if (!res.ok) {
+    //             const data = await res.json();
+    //             throw new Error(data.error || "שגיאה בעדכון הקבוצה");
+    //         }
 
-    if (loading) {
-        return (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-                <CircularProgress />
-            </Box>
-        );
-    }
+    //         setSuccess(true);
+    //         setTimeout(() => {
+    //             router.push("/dashboard/groups");
+    //         }, 2000);
+    //     } catch (err: any) {
+    //         setError(err.message || "שגיאה בעדכון הקבוצה");
+    //     } finally {
+    //         setSaving(false);
+    //     }
+    // };
 
-    if (groupStatus && groupStatus !== GroupStatus.OPEN && groupStatus !== GroupStatus.ACTIVATED) {
-        return (
-            <Container maxWidth="md" sx={{ py: 4 }}>
-                <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
-                    <Button
-                        variant="outlined"
-                        startIcon={<ArrowBack />}
-                        component={Link}
-                        href="/dashboard/groups"
-                    >
-                        חזרה לקבוצות שלי
-                    </Button>
-                </Box>
-                <Alert severity="warning">
-                    לא ניתן לערוך קבוצה שאינה במצב פתוחה או פעילה.
-                </Alert>
-            </Container>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+    //             <CircularProgress />
+    //         </Box>
+    //     );
+    // }
 
-    return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
-            <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
-                <Button
-                    variant="outlined"
-                    startIcon={<ArrowBack />}
-                    component={Link}
-                    href="/dashboard/groups"
-                >
-                    חזרה לקבוצות שלי
-                </Button>
-            </Box>
+    // if (groupStatus && groupStatus !== GroupStatus.OPEN && groupStatus !== GroupStatus.ACTIVATED) {
+    //     return (
+    //         <Container maxWidth="md" sx={{ py: 4 }}>
+    //             <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
+    //                 <Button
+    //                     variant="outlined"
+    //                     startIcon={<ArrowBack />}
+    //                     component={Link}
+    //                     href="/dashboard/groups"
+    //                 >
+    //                     חזרה לקבוצות שלי
+    //                 </Button>
+    //             </Box>
+    //             <Alert severity="warning">
+    //                 לא ניתן לערוך קבוצה שאינה במצב פתוחה או פעילה.
+    //             </Alert>
+    //         </Container>
+    //     );
+    // }
 
-            <Card>
-                <CardContent>
-                    <Typography variant="h1" gutterBottom>
-                        עריכת קבוצה
-                    </Typography>
+    // return (
+    //     <Container maxWidth="md" sx={{ py: 4 }}>
+    //         <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
+    //             <Button
+    //                 variant="outlined"
+    //                 startIcon={<ArrowBack />}
+    //                 component={Link}
+    //                 href="/dashboard/groups"
+    //             >
+    //                 חזרה לקבוצות שלי
+    //             </Button>
+    //         </Box>
 
-                    {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
+    //         <Card>
+    //             <CardContent>
+    //                 <Typography variant="h1" gutterBottom>
+    //                     עריכת קבוצה
+    //                 </Typography>
 
-                    {success && (
-                        <Alert severity="success" sx={{ mb: 2 }}>
-                            הקבוצה עודכנה בהצלחה!
-                        </Alert>
-                    )}
+    //                 {error && (
+    //                     <Alert severity="error" sx={{ mb: 2 }}>
+    //                         {error}
+    //                     </Alert>
+    //                 )}
 
-                    {initialData && (
-                        <GroupForm
-                            initialData={initialData}
-                            categories={categories}
-                            companies={companies}
-                            onSubmit={handleSubmit}
-                            loading={saving}
-                            isEditing
-                            groupStatus={groupStatus}
-                        />
-                    )}
-                </CardContent>
-            </Card>
-        </Container>
-    );
+    //                 {success && (
+    //                     <Alert severity="success" sx={{ mb: 2 }}>
+    //                         הקבוצה עודכנה בהצלחה!
+    //                     </Alert>
+    //                 )}
+
+    //                 {initialData && (
+    //                     <GroupForm
+    //                         initialData={initialData}
+    //                         categories={categories}
+    //                         companies={companies}
+    //                         onSubmit={handleSubmit}
+    //                         loading={saving}
+    //                         isEditing
+    //                         groupStatus={groupStatus}
+    //                     />
+    //                 )}
+    //             </CardContent>
+    //         </Card>
+    //     </Container>
+    // );
 }

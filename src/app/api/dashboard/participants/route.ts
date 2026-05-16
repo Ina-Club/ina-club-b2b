@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { RoleLevel } from "@/lib/types/role";
+import { getB2CUsers } from "@/lib/services/b2c-users";
 
 export async function GET(req: Request) {
   try {
@@ -22,15 +23,16 @@ export async function GET(req: Request) {
 
     // Collect all unique participants
     const participantsMap = new Map();
+    const userIds: string[] = [];
 
     activeGroups.forEach((group) => {
       group.participants.forEach((participant) => {
         if (!participantsMap.has(participant.userId)) {
+          userIds.push(participant.userId);
           participantsMap.set(participant.userId, {
             userId: participant.userId,
             name: "משתמש",
             email: "",
-            phone: "",
             groups: [],
           });
         }
@@ -40,6 +42,18 @@ export async function GET(req: Request) {
           joinedAt: participant.joinedAt.toISOString(),
         });
       });
+    });
+
+    // Fetch user details from B2C Clerk
+    const clerkUsersMap = await getB2CUsers(userIds);
+
+    // Enrich participants with Clerk data
+    participantsMap.forEach((participant, userId) => {
+      const clerkUser = clerkUsersMap.get(userId);
+      if (clerkUser) {
+        participant.name = clerkUser.name;
+        participant.email = clerkUser.email;
+      }
     });
 
     const participants = Array.from(participantsMap.values());
@@ -53,4 +67,3 @@ export async function GET(req: Request) {
     );
   }
 }
-

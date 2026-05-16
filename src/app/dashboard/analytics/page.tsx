@@ -208,9 +208,6 @@ export default function AnalyticsPage() {
                       </Box>
                     ))}
                   </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                    הערה: להתקנת גרפים, התקן את חבילת recharts
-                  </Typography>
                 </CardContent>
               </Card>
             </Box>

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { RoleLevel } from "@/lib/types/role";
-import { createClerkClient } from "@clerk/nextjs/server";
+import { getB2CUsers } from "@/lib/services/b2c-users";
 
 export async function GET(
   req: Request,
@@ -56,33 +56,26 @@ export async function GET(
     }
 
     // Fetch user details from the B2C Clerk project
-    const b2cClient = createClerkClient({ secretKey: process.env.B2C_CLERK_SECRET_KEY || "" });
+    const participantUserIds = Array.from(new Set([
+      ...activeGroup.participants.map(p => p.userId),
+      ...activeGroup.tokens.filter(t => t.status === "CONSUMED").map(t => t.userId)
+    ]));
 
-    const participants = await Promise.all(activeGroup.participants.map(async (p) => {
+    const usersMap = await getB2CUsers(participantUserIds);
+
+    const participants = activeGroup.participants.map((p) => {
       const coupon = activeGroup.coupons.find(c => c.userId === p.userId);
-      try {
-        const clerkUser = await b2cClient.users.getUser(p.userId);
-        return {
-          id: p.id,
-          userId: p.userId,
-          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "משתמש",
-          email: clerkUser.emailAddresses[0]?.emailAddress || "",
-          phone: clerkUser.phoneNumbers[0]?.phoneNumber || "",
-          joinedAt: p.joinedAt.toISOString(),
-          couponCode: coupon?.code || null,
-        };
-      } catch (err) {
-        return {
-          id: p.id,
-          userId: p.userId,
-          name: "משתמש לא ידוע",
-          email: "",
-          phone: "",
-          joinedAt: p.joinedAt.toISOString(),
-          couponCode: coupon?.code || null,
-        };
-      }
-    }));
+      const userData = usersMap.get(p.userId);
+      
+      return {
+        id: p.id,
+        userId: p.userId,
+        name: userData?.name || "משתמש לא ידוע",
+        email: userData?.email || "",
+        joinedAt: p.joinedAt.toISOString(),
+        couponCode: coupon?.code || null,
+      };
+    });
 
     const activeParticipantIds = new Set(activeGroup.participants.map(p => p.userId));
     
@@ -91,28 +84,16 @@ export async function GET(
       t => t.status === "CONSUMED" && !activeParticipantIds.has(t.userId)
     );
 
-    const exitedUsers = await Promise.all(exitedTokens.map(async (t) => {
-      try {
-        const clerkUser = await b2cClient.users.getUser(t.userId);
-        return {
-          id: `exited-${t.id}`,
-          userId: t.userId,
-          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "משתמש",
-          email: clerkUser.emailAddresses[0]?.emailAddress || "",
-          phone: clerkUser.phoneNumbers[0]?.phoneNumber || "",
-          joinedAt: t.consumedAt?.toISOString() || "",
-        };
-      } catch (err) {
-        return {
-          id: `exited-${t.id}`,
-          userId: t.userId,
-          name: "משתמש לא ידוע",
-          email: "",
-          phone: "",
-          joinedAt: t.consumedAt?.toISOString() || "",
-        };
-      }
-    }));
+    const exitedUsers = exitedTokens.map((t) => {
+      const userData = usersMap.get(t.userId);
+      return {
+        id: `exited-${t.id}`,
+        userId: t.userId,
+        name: userData?.name || "משתמש לא ידוע",
+        email: userData?.email || "",
+        joinedAt: t.consumedAt?.toISOString() || "",
+      };
+    });
 
     return NextResponse.json({
       participants,

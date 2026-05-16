@@ -29,8 +29,7 @@ export default function PricingSection() {
           color="text.secondary"
           mb={8}
         >
-          ככל שהחבילה מתקדמת יותר – אתם מקבלים יותר כוח, יותר קבוצות ויותר
-          אפשרויות
+          ככל שהחבילה מתקדמת יותר – אתם מקבלים יותר קבוצות ויותר אפשרויות
         </Typography>
 
         <Box
