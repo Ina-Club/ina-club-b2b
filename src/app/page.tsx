@@ -453,11 +453,10 @@ export default function HomePage() {
       <Container maxWidth="lg" sx={{ py: 12 }}>
         <Box sx={{ textAlign: "center", mb: 6 }}>
           <Typography variant="h4" component="h2" gutterBottom>
-            החברות שכבר איתנו
+            העסקים שכבר איתנו
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            מותגי כושר, סטודיואים וקליניקות שסומכים על Ina Club B2B לניהול
-            היומיומי
+            חברות ומותגים שסומכים על Ina Club B2B לניהול היומיומי של קבוצות הרכישה.
           </Typography>
         </Box>
         {loading ? (

@@ -4,7 +4,6 @@ import {
   Box,
   Container,
   Typography,
-  Link,
   IconButton,
   Divider,
   useTheme
@@ -12,7 +11,6 @@ import {
 import {
   Instagram as InstagramIcon,
   Email as EmailIcon,
-  Phone as PhoneIcon,
   LocationOn as LocationIcon,
 } from "@mui/icons-material";
 
@@ -39,11 +37,15 @@ export default function Footer() {
               InaClub
             </Typography>
             <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.6 }}>
-              הפלטפורמה המובילה בישראל לרכישות קבוצתיות חכמות.
+              הפלטפורמה הראשונה בישראל לרכישות קבוצתיות חכמות.
+              <br />
               חסוך כסף על המוצרים שאתה אוהב עם אלפי קונים נוספים.
             </Typography>
 
             {/* רשתות חברתיות */}
+            <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.6 }}>
+              עקבו אחרינו והצטרפו לקהילה:
+            </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
               <IconButton
                 sx={{
@@ -69,12 +71,6 @@ export default function Footer() {
                 <EmailIcon sx={{ fontSize: 20 }} />
                 <Typography variant="body2">
                   {INA_CLUB_EMAIL}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <PhoneIcon sx={{ fontSize: 20 }} />
-                <Typography variant="body2">
-                  03-1234567
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
