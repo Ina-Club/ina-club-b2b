@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, notFound } from "next/navigation";
 import {
     Box,
     Container,
@@ -29,6 +29,9 @@ interface Company {
 }
 
 export default function EditGroupPage() {
+    // Disable access to this page for now
+    notFound();
+
     const { id: groupId } = useParams<{ id: string }>();
     const { isSignedIn, isLoaded } = useUser();
     const router = useRouter();
