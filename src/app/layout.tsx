@@ -6,6 +6,7 @@ import Header from "@/components/header/header";
 import Footer from "@/components/footer/footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CLERK_APPEARANCE_CONFIG, CLERK_LOCALIZATION_CONFIG } from "@/lib/clerk-config";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Ina Club B2B - פאנל ניהול עסקי",
@@ -41,6 +42,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            <Analytics />
           </body>
         </html>
       </ThemeRegistry>
