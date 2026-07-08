@@ -49,19 +49,14 @@ const steps = [
 // סרטוני הסבר
 const tutorialVideos = [
   {
-    title: "סיור מהיר בממשק",
-    description: "היכרות עם מסך הבית, ניווט ונקודות עיקריות",
-    url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    title: "היכרות כללית עם המערכת",
+    description: "סקירה כללית של Ina Club B2B – ממשק, יכולות ותהליכי עבודה",
+    url: `/videos/${encodeURIComponent("כללי b2b.mp4")}`,
   },
   {
-    title: "ניהול קבוצות והקצאת מדריכים",
-    description: "איך לפתוח קבוצות, להגדיר תמחור ולחבר מדריך",
-    url: "https://www.youtube.com/embed/5NV6Rdv1a3I",
-  },
-  {
-    title: "מעקב משתתפים ותשלומים",
-    description: "סינון, חיפוש וייצוא נתונים מהטבלאות",
-    url: "https://www.youtube.com/embed/fJ9rUzIMcZQ",
+    title: "יצירת קבוצה",
+    description: "איך לפתוח קבוצה חדשה, להגדיר תמחור ולחבר מדריכים",
+    url: `/videos/${encodeURIComponent("יצירת קבוצה b2b.mp4")}`,
   },
 ];
 
@@ -69,7 +64,6 @@ export default function HomePage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -81,19 +75,11 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [companiesRes, testimonialsRes] = await Promise.all([
-          fetch("/api/companies"),
-          fetch("/api/testimonials"),
-        ]);
+        const companiesRes = await fetch("/api/companies");
 
         if (companiesRes.ok) {
           const companiesData = await companiesRes.json();
           setCompanies(companiesData.companies || []);
-        }
-
-        if (testimonialsRes.ok) {
-          const testimonialsData = await testimonialsRes.json();
-          setTestimonials(testimonialsData.testimonials || []);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -326,121 +312,56 @@ export default function HomePage() {
         </Box>
       </Container>
 
-      {/* המלצות */}
+      {/* סרטוני הדרכה */}
       <Box sx={{ background: "linear-gradient(135deg,#f8fafc,#eef2ff)" }}>
         <Container maxWidth="lg" sx={{ py: 12 }}>
           <Box sx={{ textAlign: "center", mb: 8 }}>
             <Typography variant="h4" gutterBottom>
-              רואים איך זה עובד – ושומעים מה הלקוחות חושבים
+              רואים איך זה עובד
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              סרטוני הדרכה קצרים לצד חוות דעת אמיתיות ממנהלי סטודיואים ועסקים
+              סרטוני הדרכה קצרים להיכרות עם המערכת
             </Typography>
           </Box>
 
-          {/* חלק עליון – וידאו + המלצות */}
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-              gap: 4,
-              mb: 6,
-            }}
-          >
-            {/* וידאו ראשי */}
-            <Card sx={{ borderRadius: 3, overflow: "hidden", boxShadow: 4 }}>
-              <Box sx={{ position: "relative", pt: "56.25%", bgcolor: "#000" }}>
-                <Box
-                  component="iframe"
-                  src={tutorialVideos[0].url}
-                  title={tutorialVideos[0].title}
-                  allowFullScreen
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    border: 0,
-                  }}
-                />
-              </Box>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: "#1a2a5a" }}>
-                  {tutorialVideos[0].title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {tutorialVideos[0].description}
-                </Typography>
-              </CardContent>
-            </Card>
-
-            {/* המלצות */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {loading ? (
-                <Typography>טוען...</Typography>
-              ) : testimonials.length > 0 ? (
-                testimonials.slice(0, 3).map((item, index) => (
-                  <Card
-                    key={item.id || index}
-                    sx={{
-                      borderRadius: 3,
-                      boxShadow: 3,
-                      bgcolor: "#f8fafc",
-                      height: "100%",
-                    }}
-                  >
-                    <CardContent>
-                      <Typography sx={{ mb: 2, color: "#1a2a5a" }}>
-                        "{item.quote}"
-                      </Typography>
-                      <Typography fontWeight="bold">{item.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {item.role} · {item.company?.title || item.companyName}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <Typography>אין המלצות להצגה</Typography>
-              )}
-            </Box>
-          </Box>
-
-          {/* סרטונים נוספים */}
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3,1fr)" },
+              gridTemplateColumns: { xs: "1fr", md: "repeat(2,1fr)" },
               gap: 4,
             }}
           >
-            {tutorialVideos.slice(1).map((video, index) => (
+            {tutorialVideos.map((video, index) => (
               <Card
                 key={index}
                 sx={{
                   borderRadius: 3,
-                  boxShadow: 3,
+                  boxShadow: 4,
                   overflow: "hidden",
                 }}
               >
                 <Box sx={{ position: "relative", pt: "56.25%", bgcolor: "#000" }}>
                   <Box
-                    component="iframe"
+                    component="video"
                     src={video.url}
                     title={video.title}
-                    allowFullScreen
+                    controls
+                    playsInline
                     sx={{
                       position: "absolute",
                       inset: 0,
                       width: "100%",
                       height: "100%",
-                      border: 0,
+                      objectFit: "contain",
                     }}
                   />
                 </Box>
                 <CardContent>
-                  <Typography variant="subtitle1" sx={{ color: "#1a2a5a" }}>
+                  <Typography variant="h6" sx={{ color: "#1a2a5a" }}>
                     {video.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {video.description}
                   </Typography>
                 </CardContent>
               </Card>
