@@ -88,7 +88,7 @@ export default function CompanyPage() {
 
   return (
     <DashboardLayout>
-      <Card sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
+      <Card sx={{ maxWidth: 900, mx: "auto", p: { xs: 0, sm: 2 } }}>
         <CardContent>
           {/* Logo + Title */}
           <Box sx={{ textAlign: "center", mb: 3 }}>
@@ -103,7 +103,7 @@ export default function CompanyPage() {
                 boxShadow: 3,
               }}
             />
-            <Typography variant="h4" fontWeight="bold">
+            <Typography variant="h4" fontWeight="bold" sx={{ wordBreak: "break-word" }}>
               {company.title}
               {company.verified && (
                 <CheckCircleIcon
@@ -181,9 +181,9 @@ export default function CompanyPage() {
 
 function Detail({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
       {icon}
-      <Typography>{text}</Typography>
+      <Typography sx={{ overflowWrap: "anywhere" }}>{text}</Typography>
     </Box>
   );
 }

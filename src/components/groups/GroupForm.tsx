@@ -212,7 +212,7 @@ export default function GroupForm({
                     ))}
                 </TextField>
 
-                <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
                     <TextField
                         label="מחיר בסיסי (₪)"
                         type="number"
@@ -247,7 +247,7 @@ export default function GroupForm({
                     InputLabelProps={{ shrink: true }}
                 />
 
-                <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
                     <TextField
                         label="מינימום משתתפים"
                         type="number"
@@ -340,7 +340,15 @@ export default function GroupForm({
                     </Box>
                 </Box>
 
-                <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 4 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column-reverse", sm: "row" },
+                        gap: 2,
+                        justifyContent: "flex-end",
+                        mt: 4,
+                    }}
+                >
                     <Button
                         variant="outlined"
                         component={Link}

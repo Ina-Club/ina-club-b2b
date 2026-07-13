@@ -105,13 +105,29 @@ export default function GroupsPage() {
 
   return (
     <DashboardLayout>
-      <Box>
-        <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box sx={{ minWidth: 0 }}>
+        <Box
+          sx={{
+            mb: 4,
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", md: "center" },
+            gap: 2,
+          }}
+        >
           <Typography variant="h4" sx={{ fontWeight: "bold", color: "#1a2a5a" }}>
             הקבוצות שלי
           </Typography>
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            <FormControl sx={{ minWidth: 200 }} size="small">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 2,
+              alignItems: { xs: "stretch", sm: "center" },
+            }}
+          >
+            <FormControl sx={{ minWidth: { xs: "100%", sm: 200 } }} size="small">
               <InputLabel id="status-filter-label">סנן לפי סטטוס</InputLabel>
               <Select
                 labelId="status-filter-label"
@@ -169,8 +185,8 @@ export default function GroupsPage() {
             </CardContent>
           </Card>
         ) : (
-          <TableContainer component={Paper}>
-            <Table>
+          <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
+            <Table sx={{ minWidth: 900 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>כותרת</TableCell>
@@ -242,4 +258,3 @@ export default function GroupsPage() {
     </DashboardLayout>
   );
 }
-
