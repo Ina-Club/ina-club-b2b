@@ -141,7 +141,7 @@ export default function CreateGroupPage() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
         <Button
           variant="outlined"
@@ -154,7 +154,7 @@ export default function CreateGroupPage() {
       </Box>
 
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <Typography variant="h1" gutterBottom>
             צור קבוצה פעילה חדשה
           </Typography>
@@ -183,4 +183,3 @@ export default function CreateGroupPage() {
     </Container>
   );
 }
-

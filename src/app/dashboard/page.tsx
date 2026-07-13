@@ -88,8 +88,17 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <Box>
-        <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box sx={{ minWidth: 0 }}>
+        <Box
+          sx={{
+            mb: 4,
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+          }}
+        >
           <Typography variant="h1">לוח בקרה</Typography>
           <Button
             variant="contained"

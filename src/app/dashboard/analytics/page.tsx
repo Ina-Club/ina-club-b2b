@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout>
-      <Box>
+      <Box sx={{ minWidth: 0 }}>
         <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold", color: "#1a2a5a" }}>
           נתונים וגרפים
         </Typography>
@@ -244,4 +244,3 @@ export default function AnalyticsPage() {
     </DashboardLayout>
   );
 }
-
