@@ -86,7 +86,7 @@ export default function ParticipantsPage() {
 
   return (
     <DashboardLayout>
-      <Box>
+      <Box sx={{ minWidth: 0 }}>
         <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold", color: "#1a2a5a" }}>
           משתתפים
         </Typography>
@@ -109,8 +109,8 @@ export default function ParticipantsPage() {
             </CardContent>
           </Card>
         ) : (
-          <TableContainer component={Paper}>
-            <Table>
+          <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
+            <Table sx={{ minWidth: 620 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>שם</TableCell>
@@ -145,4 +145,3 @@ export default function ParticipantsPage() {
     </DashboardLayout>
   );
 }
-

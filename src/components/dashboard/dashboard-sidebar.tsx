@@ -140,6 +140,7 @@ export default function DashboardSidebar({
     return (
       <Drawer
         variant="permanent"
+        anchor="right"
         sx={{
           width: drawerWidth,
           flexShrink: 0,
@@ -160,13 +161,14 @@ export default function DashboardSidebar({
   return (
     <Drawer
       variant={variant}
+      anchor="right"
       open={open}
       onClose={onClose}
       sx={{
-        width: drawerWidth,
+        width: { xs: "min(280px, 86vw)", sm: drawerWidth },
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: drawerWidth,
+          width: { xs: "min(280px, 86vw)", sm: drawerWidth },
           boxSizing: "border-box",
         },
       }}
@@ -175,4 +177,3 @@ export default function DashboardSidebar({
     </Drawer>
   );
 }
-

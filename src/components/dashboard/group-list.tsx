@@ -39,8 +39,8 @@ export default function GroupList({ groups }: GroupListProps) {
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
+    <TableContainer component={Paper} sx={{ width: "100%", overflowX: "auto" }}>
+      <Table sx={{ minWidth: 760 }}>
         <TableHead>
           <TableRow>
             <TableCell>כותרת</TableCell>
